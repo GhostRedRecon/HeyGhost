@@ -1,4 +1,5 @@
 PyYAML>=6.0
+numpy>=1.24
 sounddevice>=0.4.6
 setuptools<82
 webrtcvad>=2.0.10

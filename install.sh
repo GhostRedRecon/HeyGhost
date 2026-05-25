@@ -15,6 +15,7 @@ RUN_DEPENDENCIES=1
 RUN_TESTS=1
 CREATE_DESKTOP_ICON=1
 DEPENDENCY_ARGS=()
+REPAIR_ATTEMPTED=0
 
 usage() {
   cat <<'EOF'
@@ -144,6 +145,27 @@ run_dependency_installer() {
   HEY_GHOST_INSTALL_ROOT="${INSTALL_ROOT}" "${installer}" --install-root "${INSTALL_ROOT}" "${DEPENDENCY_ARGS[@]}"
 }
 
+install_python_requirements() {
+  log "Installing Python package requirements."
+  "${INSTALL_ROOT}/venv/bin/pip" install --upgrade pip
+  "${INSTALL_ROOT}/venv/bin/pip" install -r "${PROJECT_ROOT}/requirements.txt"
+}
+
+repair_dependencies() {
+  if [[ "${RUN_DEPENDENCIES}" -eq 0 ]]; then
+    fail "A post-install check failed, but --skip-dependencies prevents automatic repair."
+  fi
+  if [[ "${REPAIR_ATTEMPTED}" -eq 1 ]]; then
+    fail "Post-install checks still fail after dependency repair."
+  fi
+
+  REPAIR_ATTEMPTED=1
+  log "A post-install check failed. Reinstalling required dependencies and retrying once."
+  run_dependency_installer
+  install_python_requirements
+  chown -R "${SERVICE_USER}:${SERVICE_GROUP}" "${INSTALL_ROOT}" "${LOG_DIR}"
+}
+
 create_service_user() {
   log "Creating service user if needed."
   if ! getent group "${SERVICE_GROUP}" >/dev/null 2>&1; then
@@ -203,8 +225,7 @@ install_files() {
   fi
 
   python3 -m venv "${INSTALL_ROOT}/venv"
-  "${INSTALL_ROOT}/venv/bin/pip" install --upgrade pip
-  "${INSTALL_ROOT}/venv/bin/pip" install -r "${PROJECT_ROOT}/requirements.txt"
+  install_python_requirements
 
   mkdir -p \
     "${INSTALL_ROOT}/bin" \
@@ -385,46 +406,93 @@ verify_dependency_files() {
     fi
   done
 
-  if [[ "${missing}" -ne 0 ]]; then
-    fail "Dependency verification failed. Re-run sudo ./scripts/install_dependencies.sh or install the missing files manually."
-  fi
+  return "${missing}"
+}
+
+verify_python_imports() {
+  log "Checking Python runtime imports."
+  PYTHONPATH="${INSTALL_ROOT}" "${INSTALL_ROOT}/venv/bin/python" - <<'HEY_GHOST_PY' || return 1
+import importlib
+
+modules = (
+    "yaml",
+    "numpy",
+    "sounddevice",
+    "webrtcvad",
+    "heyghost.app",
+    "heyghost.wake.wake_word",
+    "tkinter",
+)
+for module in modules:
+    importlib.import_module(module)
+print("Python import check passed")
+HEY_GHOST_PY
 }
 
 run_post_install_tests() {
   if [[ "${RUN_TESTS}" -eq 0 ]]; then
     log "Skipping tests."
-    return
+    return 0
   fi
 
   log "Running HeyGhost test suite."
   if [[ -f "${INSTALL_ROOT}/tests/run_tests.py" ]]; then
-    PYTHONDONTWRITEBYTECODE=1 "${INSTALL_ROOT}/venv/bin/python" "${INSTALL_ROOT}/tests/run_tests.py"
+    PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="${INSTALL_ROOT}" \
+      "${INSTALL_ROOT}/venv/bin/python" "${INSTALL_ROOT}/tests/run_tests.py" || return 1
   else
     warn "Tests were not installed; skipping Python test suite."
   fi
 
   log "Checking installed configuration can load."
-  HEY_GHOST_CONFIG="${CONFIG_ROOT}/config.yaml" "${INSTALL_ROOT}/venv/bin/python" - <<'HEY_GHOST_PY'
+  HEY_GHOST_CONFIG="${CONFIG_ROOT}/config.yaml" PYTHONPATH="${INSTALL_ROOT}" \
+    "${INSTALL_ROOT}/venv/bin/python" - <<'HEY_GHOST_PY' || return 1
 import os
 from heyghost.config import load_config
 load_config(os.environ["HEY_GHOST_CONFIG"])
-print('Config load check passed')
+print("Config load check passed")
 HEY_GHOST_PY
 
-  if command -v ollama >/dev/null 2>&1; then
-    if ollama list >/dev/null 2>&1; then
-      log "Ollama is installed and responding."
-    else
-      warn "Ollama is installed but not responding. Start it with: systemctl start ollama"
-    fi
-  else
-    fail "Ollama command was not found after dependency installation."
+  if ! command -v ollama >/dev/null 2>&1; then
+    warn "Ollama command was not found after dependency installation."
+    return 1
+  fi
+  if ! ollama list >/dev/null 2>&1; then
+    warn "Ollama is installed but not responding."
+    return 1
+  fi
+  log "Ollama is installed and responding."
+
+  log "Checking Piper binary."
+  "${INSTALL_ROOT}/bin/piper" --help >/dev/null 2>&1 || return 1
+
+  log "Checking whisper.cpp binary."
+  "${INSTALL_ROOT}/bin/whisper-cli" --help >/dev/null 2>&1 || return 1
+}
+
+run_all_post_install_checks() {
+  verify_dependency_files && verify_python_imports && run_post_install_tests
+}
+
+run_checks_with_repair() {
+  if run_all_post_install_checks; then
+    return
   fi
 
-  if [[ -x "${INSTALL_ROOT}/bin/piper" ]]; then
-    log "Checking Piper binary."
-    "${INSTALL_ROOT}/bin/piper" --help >/dev/null 2>&1 || warn "Piper binary exists but --help returned a warning."
+  repair_dependencies
+  run_all_post_install_checks || fail "Post-install checks failed after dependency repair."
+}
+
+launch_heyghost_app() {
+  log "Launching HeyGhost service."
+  systemctl restart hey-ghost.service
+
+  if systemctl is-active --quiet hey-ghost.service; then
+    log "HeyGhost service is running."
+    return
   fi
+
+  systemctl status hey-ghost.service --no-pager || true
+  fail "HeyGhost service failed to start."
 }
 
 print_next_steps() {
@@ -470,6 +538,6 @@ install_desktop_wrapper
 install_service
 enable_service
 create_desktop_icon
-verify_dependency_files
-run_post_install_tests
+run_checks_with_repair
+launch_heyghost_app
 print_next_steps
