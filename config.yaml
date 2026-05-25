@@ -1,0 +1,177 @@
+assistant:
+  name: "Ghost"
+  wake_phrase: "hey ghost"
+  mode: "wake_word_session"
+  follow_up_timeout_seconds: 30
+  session_timeout_seconds: 30
+  max_response_words: 40
+  acknowledgement: "Yes?"
+
+llm:
+  provider: "ollama"
+  model: "qwen2.5:0.5b"
+  url: "${HEY_GHOST_OLLAMA_URL:-http://localhost:11434/api/generate}"
+  num_ctx: 512
+  num_predict: 48
+  temperature: 0.2
+  keep_alive: "15m"
+
+stt:
+  engine: "whisper.cpp"
+  active_profile: "fast"
+  retry_profile: "balanced"
+  retry_on_low_confidence: true
+  model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/whisper/ggml-tiny.en.bin"
+  binary_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/bin/whisper-cli"
+  language: "en"
+  threads: 4
+  beam_size: 1
+  best_of: 1
+  audio_context: 0
+  temperature: 0.0
+  no_speech_threshold: 0.45
+  min_confidence: 0.50
+  split_on_word: true
+  suppress_non_speech: true
+  no_fallback: true
+  ignored_phrases:
+    - "thank you for watching"
+    - "thanks for watching"
+    - "see you in the next video"
+    - "visit our website"
+  prompt: "This is a short spoken command to a local voice assistant named Ghost. Common requests include: what time is it, how much RAM does the system have, CPU info, operating system info, which model are you running, what are your capabilities, show your LLM capabilities, system status, disk space, yoga questions, cybersecurity questions, open browser, and open a website like google.com or youtube.com."
+  profiles:
+    fast:
+      model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/whisper/ggml-tiny.en.bin"
+      beam_size: 1
+      best_of: 1
+    balanced:
+      model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/whisper/ggml-base.en.bin"
+      beam_size: 1
+      best_of: 1
+    accurate:
+      model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/whisper/ggml-small.en.bin"
+      beam_size: 1
+      best_of: 1
+
+tts:
+  engine: "piper"
+  binary_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/bin/piper"
+  model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/piper/en_US-lessac-medium.onnx"
+  speaker_wav_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/heyghost_response.wav"
+  length_scale: 0.9
+  sentence_silence: 0.05
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  input_device: null
+  output_device: null
+  silence_timeout_ms: 350
+  min_speech_ms: 250
+  frame_duration_ms: 30
+  max_record_seconds: 4
+  preroll_ms: 180
+  vad_backend: "webrtc"
+  vad_aggressiveness: 3
+
+wake_word:
+  engine: "manual"
+  session_mode: "wake_word_session"
+  sensitivity: 0.5
+  model_name: "hey_ghost"
+  dev_trigger_file: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/heyghost_wake"
+  poll_interval_ms: 250
+
+conversation:
+  keep_last_turns: 4
+  memory_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/conversation-memory.sqlite3"
+  summary_max_chars: 1200
+  max_persistent_messages: 200
+
+logging:
+  level: "INFO"
+  log_file: "${HEY_GHOST_LOG_DIR:-/var/log/hey-ghost}/hey-ghost.log"
+  debug_events_file: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/debug-events.jsonl"
+
+routing:
+  structured_output: false
+  min_route_confidence: 0.55
+  enable_rag_placeholder: true
+  low_confidence_clarify: true
+
+llm_capabilities:
+  enabled: true
+  model_fast: "qwen2.5:0.5b"
+  model_quality: "gemma3:1b"
+  use_structured_outputs: true
+  use_tool_calling: false
+  max_spoken_words: 55
+  explain_command_results: true
+  summarize_notes: true
+  analyze_logs: true
+  local_rag_enabled: true
+  vision_enabled: false
+
+rag:
+  enabled: true
+  embedding_model: "nomic-embed-text"
+  knowledge_dir: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/knowledge"
+  index_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/rag-index.sqlite3"
+  chunk_chars: 800
+  chunk_overlap: 120
+  top_k: 4
+  require_sources: true
+
+gui:
+  enabled: true
+  style: "ghost_wave"
+  fullscreen: false
+  low_power_mode: true
+  animation_interval_ms: 50
+  background: "#030712"
+  font_family: "DejaVu Sans"
+  fallback_font_family: "DejaVu Sans"
+  title_font_size: 24
+  status_font_size: 14
+  transcript_font_size: 12
+  diagnostics_default: false
+
+  ghost_wave:
+    waveform_bars: 64
+    waveform_width_ratio: 0.70
+    waveform_height: 150
+    center_dot_radius: 7
+    idle_amplitude: 0.08
+    listening_amplitude: 0.85
+    thinking_amplitude: 0.28
+    speaking_amplitude: 0.65
+    smoothing: 0.18
+    glow_enabled: true
+    mirror_waveform: true
+    show_center_core: true
+    show_micro_status: true
+
+  colors:
+    idle: "#64748b"
+    wake_detected: "#22c55e"
+    listening: "#00ffaa"
+    transcribing: "#38bdf8"
+    thinking: "#60a5fa"
+    speaking: "#22d3ee"
+    uncertain: "#facc15"
+    error: "#f87171"
+    text_primary: "#e5e7eb"
+    text_secondary: "#94a3b8"
+    panel: "#0f172a"
+
+safety:
+  require_confirmation_for_risky_actions: true
+  defensive_cyber_only: true
+  health_is_general_wellness: true
+  prevent_system_status_hallucination: true
+
+observability:
+  enabled: true
+  include_turn_id: true
+  log_timing: true

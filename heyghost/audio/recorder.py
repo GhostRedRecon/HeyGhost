@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+import tempfile
+import time
+import wave
+from collections import deque
+from collections.abc import Callable
+from pathlib import Path
+
+from heyghost.audio.input import AudioInput
+from heyghost.audio.vad import VoiceActivityDetector
+
+
+class Recorder:
+    def __init__(
+        self,
+        audio_input: AudioInput,
+        vad: VoiceActivityDetector,
+        sample_rate: int,
+        channels: int,
+        frame_duration_ms: int,
+        silence_timeout_ms: int,
+        min_speech_ms: int,
+        max_record_seconds: int,
+        preroll_ms: int = 300,
+        on_speech_started: Callable[[], None] | None = None,
+        on_speech_ended: Callable[[], None] | None = None,
+    ) -> None:
+        self.audio_input = audio_input
+        self.vad = vad
+        self.sample_rate = sample_rate
+        self.channels = channels
+        self.frame_duration_ms = frame_duration_ms
+        self.silence_timeout_ms = silence_timeout_ms
+        self.min_speech_ms = min_speech_ms
+        self.max_record_seconds = max_record_seconds
+        self.preroll_ms = preroll_ms
+        self.frame_size = int(self.sample_rate * self.frame_duration_ms / 1000)
+        self.max_frames = int((1000 * self.max_record_seconds) / self.frame_duration_ms)
+        self.preroll_frames = max(0, self.preroll_ms // self.frame_duration_ms)
+        self.on_speech_started = on_speech_started
+        self.on_speech_ended = on_speech_ended
+        self.last_timing: dict[str, float] = {}
+
+    def record_until_silence(self) -> str | None:
+        started = time.perf_counter()
+        speech_frames: list[bytes] = []
+        preroll_buffer: deque[bytes] = deque(maxlen=self.preroll_frames)
+        silence_frames = 0
+        speech_ms = 0
+        heard_speech = False
+        silence_limit = max(1, self.silence_timeout_ms // self.frame_duration_ms)
+
+        with self.audio_input.open_stream(blocksize=self.frame_size) as stream:
+            for _ in range(self.max_frames):
+                frame, overflowed = stream.read(self.frame_size)
+                if overflowed:
+                    continue
+
+                speech = self.vad.is_speech(frame, self.sample_rate)
+                if speech:
+                    if not heard_speech and preroll_buffer:
+                        speech_frames.extend(preroll_buffer)
+                        preroll_buffer.clear()
+                    if not heard_speech and self.on_speech_started is not None:
+                        self.on_speech_started()
+                    heard_speech = True
+                    speech_ms += self.frame_duration_ms
+                    silence_frames = 0
+                    speech_frames.append(frame)
+                    continue
+
+                if not heard_speech and self.preroll_frames > 0:
+                    preroll_buffer.append(frame)
+
+                if heard_speech:
+                    silence_frames += 1
+                    speech_frames.append(frame)
+                    if silence_frames >= silence_limit:
+                        if self.on_speech_ended is not None:
+                            self.on_speech_ended()
+                        break
+        total_ms = (time.perf_counter() - started) * 1000.0
+        silence_wait_ms = silence_frames * self.frame_duration_ms if heard_speech else 0
+        self.last_timing = {
+            "recording_ms": total_ms,
+            "speech_ms": float(speech_ms),
+            "silence_wait_ms": float(silence_wait_ms),
+        }
+
+        if not heard_speech or speech_ms < self.min_speech_ms:
+            return None
+
+        fd, output_path = tempfile.mkstemp(prefix="heyghost_input_", suffix=".wav")
+        Path(output_path).unlink(missing_ok=True)
+        self._write_wav(output_path, speech_frames)
+        return output_path
+
+    def _write_wav(self, path: str, frames: list[bytes]) -> None:
+        with wave.open(path, "wb") as wav_file:
+            wav_file.setnchannels(self.channels)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(self.sample_rate)
+            wav_file.writeframes(b"".join(frames))

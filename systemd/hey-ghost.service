@@ -1,0 +1,25 @@
+[Unit]
+Description=HeyGhost Local Voice Assistant
+After=network.target sound.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=heyghost
+Group=heyghost
+SupplementaryGroups=audio
+WorkingDirectory=/opt/hey-ghost
+Environment=HEY_GHOST_INSTALL_ROOT=/opt/hey-ghost
+Environment=HEY_GHOST_CONFIG_ROOT=/etc/hey-ghost
+Environment=HEY_GHOST_LOG_DIR=/var/log/hey-ghost
+Environment=HEY_GHOST_CONFIG=/etc/hey-ghost/config.yaml
+ExecStart=/opt/hey-ghost/venv/bin/python /opt/hey-ghost/heyghost.py --config /etc/hey-ghost/config.yaml run
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=false
+ReadWritePaths=/var/log/hey-ghost /tmp /opt/hey-ghost
+
+[Install]
+WantedBy=multi-user.target

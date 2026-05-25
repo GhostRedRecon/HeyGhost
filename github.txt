@@ -1,0 +1,75 @@
+HeyGhost Public-Readiness Notes
+===============================
+
+Backup created before cleanup:
+/tmp/HeyGhost-backup-20260525-public-ready
+
+Purpose
+-------
+
+HeyGhost is intended to be a public Linux voice-assistant project that users can clone, install, test, and extend on their own Linux devices. The project is local-first and uses local STT, local Ollama models, local Piper TTS, explicit Python skills, and optional local RAG.
+
+Safety Notice
+-------------
+
+This project is for educational, research, and authorized personal automation use only. Do not use it for hacking, unauthorized access, credential theft, malware activity, network abuse, or any illegal purpose. Cybersecurity content and demonstrations must remain defensive, educational, and authorized.
+
+Cleanup Completed
+-----------------
+
+- Removed user-specific home-directory paths from service and desktop launchers.
+- Made install, config, log, wrapper, and service paths configurable with environment variables.
+- Added env-expandable config values such as ${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}.
+- Added config.example.yaml for public configuration reuse.
+- Changed public defaults to manual/wake-word-session behavior instead of always-on listening.
+- Changed audio device defaults to null so new devices can use system defaults.
+- Aligned Piper path to /opt/hey-ghost/bin/piper.
+- Aligned the primary Ollama model to qwen2.5:0.5b.
+- Removed public voice aliases that launched Wifite or Metasploit.
+- Added .gitignore for Python caches, logs, local databases, generated audio, model folders, and backup files.
+- Updated README.md with public installation, dependency, configuration, test, and safety instructions.
+
+Main Files
+----------
+
+- heyghost.py: CLI entry point.
+- config.yaml: Public-safe default config.
+- config.example.yaml: Copyable config template.
+- install.sh: Linux installer with configurable roots.
+- uninstall.sh: Linux uninstaller with configurable roots.
+- heyghost/app.py: Main assistant runtime and CLI commands.
+- heyghost/config.py: YAML config loader with environment-variable expansion.
+- heyghost/skills/registry.py: Local skill registry and deterministic command routing.
+- heyghost/audio, heyghost/stt, heyghost/tts: Voice input/output pipeline.
+- heyghost/llm and heyghost/rag: Ollama and local knowledge features.
+- heyghost/gui and heyghost/debug_window.py: Native debug UI.
+- tests/: Lightweight test suite.
+
+How To Test Before GitHub
+-------------------------
+
+Run:
+
+python3 tests/run_tests.py
+
+Then install locally:
+
+sudo ./install.sh
+
+Install or link external binaries/models at the configured paths, then run:
+
+ollama pull qwen2.5:0.5b
+ollama pull nomic-embed-text
+heyghost test-ollama
+heyghost test-tts
+heyghost start
+heyghost status
+heyghost trigger
+
+Remaining Recommended GitHub Items
+----------------------------------
+
+- Add a LICENSE file before publishing.
+- Add SECURITY.md with responsible disclosure and safe-use guidance.
+- Consider adding CONTRIBUTING.md if accepting outside contributions.
+- Test install.sh on a fresh Linux VM before publishing the first release.

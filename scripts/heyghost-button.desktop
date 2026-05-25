@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=HeyGhost
+Comment=Open the HeyGhost visual interface
+Exec=heyghost desktop
+Icon=audio-input-microphone
+Terminal=false
+Categories=Utility;

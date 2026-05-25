@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Logs and runtime output
+*.log
+*.jsonl
+*.sqlite3
+*.wav
+heyghost-ui.log
+
+# Local machine config and backups
+config.local.yaml
+*.bak
+
+# Large local model/data directories
+models/
+knowledge/
+shared/
+data/
+
+# Editors and OS files
+.DS_Store
+.idea/
+.vscode/
+# Test and coverage output
+.coverage
+htmlcov/
+coverage.xml
+
+# Local secrets
+.env
+*.secret
