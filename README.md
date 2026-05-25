@@ -154,27 +154,35 @@ git clone https://github.com/GhostRedRecon/HeyGhost.git
 cd HeyGhost
 ```
 
-Run the tests before installing:
+Run the local development tests before installing:
 
 ```bash
 python3 tests/run_tests.py
 ```
 
-Install external dependencies automatically:
-
-```bash
-sudo ./scripts/install_dependencies.sh
-```
-
-This installs system packages, Ollama models, whisper.cpp, Whisper models, Piper, and the default Piper voice into the paths HeyGhost expects. If you prefer to install those tools manually, follow the steps below.
-
-Install HeyGhost as a system service:
+Install HeyGhost and all default runtime dependencies with one command:
 
 ```bash
 sudo ./install.sh
 ```
 
-Install Ollama models manually:
+The installer installs system packages, Ollama, default Ollama models, whisper.cpp, Whisper models, Piper, the default Piper voice, the Python virtual environment, the `heyghost` command, the systemd service, and a desktop launcher icon. It also runs post-install checks so the user knows whether the installation is usable.
+
+Useful installer options:
+
+```bash
+sudo ./install.sh --skip-tests
+sudo ./install.sh --skip-desktop-icon
+sudo ./install.sh --dependency-arg --ollama-model --dependency-arg llama3.2:1b
+```
+
+Advanced users can run the dependency installer separately if they only want to prepare external tools:
+
+```bash
+sudo ./scripts/install_dependencies.sh
+```
+
+Manual Ollama model installation:
 
 ```bash
 ollama pull qwen2.5:0.5b
