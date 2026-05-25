@@ -6,6 +6,7 @@ INSTALL_ROOT="${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}"
 CONFIG_ROOT="${HEY_GHOST_CONFIG_ROOT:-/etc/hey-ghost}"
 SERVICE_PATH="${HEY_GHOST_SERVICE_PATH:-/etc/systemd/system/hey-ghost.service}"
 WRAPPER_PATH="${HEY_GHOST_WRAPPER_PATH:-/usr/local/bin/heyghost}"
+DESKTOP_WRAPPER_PATH="${HEY_GHOST_DESKTOP_WRAPPER_PATH:-/usr/local/bin/heyghost-desktop}"
 LOG_DIR="${HEY_GHOST_LOG_DIR:-/var/log/hey-ghost}"
 SERVICE_USER="${HEY_GHOST_SERVICE_USER:-heyghost}"
 SERVICE_GROUP="${HEY_GHOST_SERVICE_GROUP:-${SERVICE_USER}}"
@@ -26,7 +27,7 @@ What this installs:
   - Debian/Kali/Ubuntu system packages through apt-get
   - Ollama, default Ollama models, whisper.cpp, Whisper models, Piper, Piper voice
   - HeyGhost Python virtual environment and service files
-  - heyghost command wrapper
+  - heyghost command wrapper and GUI launcher
   - systemd service
   - Desktop launcher icon for the invoking desktop user
   - Post-install checks and test suite
@@ -108,6 +109,7 @@ parse_args() {
 refresh_paths() {
   SERVICE_PATH="${HEY_GHOST_SERVICE_PATH:-/etc/systemd/system/hey-ghost.service}"
   WRAPPER_PATH="${HEY_GHOST_WRAPPER_PATH:-/usr/local/bin/heyghost}"
+  DESKTOP_WRAPPER_PATH="${HEY_GHOST_DESKTOP_WRAPPER_PATH:-/usr/local/bin/heyghost-desktop}"
 }
 
 require_root() {
@@ -229,6 +231,57 @@ EOF
   chmod +x "${WRAPPER_PATH}"
 }
 
+install_desktop_wrapper() {
+  log "Installing desktop GUI launcher at ${DESKTOP_WRAPPER_PATH}."
+  cat > "${DESKTOP_WRAPPER_PATH}" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+STATE_DIR="\${XDG_STATE_HOME:-\${HOME}/.local/state}/heyghost"
+DATA_DIR="\${XDG_DATA_HOME:-\${HOME}/.local/share}/heyghost"
+SHARED_DIR="\${STATE_DIR}/shared"
+LOG_DIR="\${STATE_DIR}/logs"
+USER_CONFIG="\${STATE_DIR}/config.yaml"
+SOURCE_CONFIG="\${HEY_GHOST_CONFIG:-${CONFIG_ROOT}/config.yaml}"
+LAUNCH_LOG="\${STATE_DIR}/desktop-launch.log"
+mkdir -p "\${SHARED_DIR}" "\${LOG_DIR}" "\${DATA_DIR}/knowledge"
+{
+  printf '\n[%s] Launching HeyGhost desktop GUI\n' "\$(date -Is)"
+  "${INSTALL_ROOT}/venv/bin/python" - "\${SOURCE_CONFIG}" "\${USER_CONFIG}" "\${STATE_DIR}" "\${DATA_DIR}" <<'HEY_GHOST_DESKTOP_CONFIG'
+from pathlib import Path
+import sys
+import yaml
+
+source = Path(sys.argv[1])
+target = Path(sys.argv[2])
+state_dir = Path(sys.argv[3])
+data_dir = Path(sys.argv[4])
+shared_dir = state_dir / "shared"
+log_dir = state_dir / "logs"
+knowledge_dir = data_dir / "knowledge"
+for directory in (shared_dir, log_dir, knowledge_dir):
+    directory.mkdir(parents=True, exist_ok=True)
+
+with source.open("r", encoding="utf-8") as handle:
+    config = yaml.safe_load(handle)
+
+config.setdefault("tts", {})["speaker_wav_path"] = str(shared_dir / "heyghost_response.wav")
+config.setdefault("wake_word", {})["dev_trigger_file"] = str(shared_dir / "heyghost_wake")
+config.setdefault("conversation", {})["memory_path"] = str(shared_dir / "conversation-memory.sqlite3")
+config.setdefault("logging", {})["log_file"] = str(log_dir / "hey-ghost.log")
+config.setdefault("logging", {})["debug_events_file"] = str(shared_dir / "debug-events.jsonl")
+config.setdefault("rag", {})["index_path"] = str(shared_dir / "rag-index.sqlite3")
+config.setdefault("rag", {})["knowledge_dir"] = str(knowledge_dir)
+
+target.parent.mkdir(parents=True, exist_ok=True)
+with target.open("w", encoding="utf-8") as handle:
+    yaml.safe_dump(config, handle, sort_keys=False)
+HEY_GHOST_DESKTOP_CONFIG
+  HEY_GHOST_CONFIG="\${USER_CONFIG}" exec "${WRAPPER_PATH}" desktop
+} >> "\${LAUNCH_LOG}" 2>&1
+EOF
+  chmod +x "${DESKTOP_WRAPPER_PATH}"
+}
+
 install_service() {
   log "Installing systemd service."
   cat > "${SERVICE_PATH}" <<EOF
@@ -292,8 +345,9 @@ Type=Application
 Version=1.0
 Name=HeyGhost
 Comment=Local-first Linux voice assistant
-Exec=${WRAPPER_PATH} desktop
+Exec=${DESKTOP_WRAPPER_PATH}
 Terminal=false
+Icon=audio-input-microphone
 Categories=Utility;Audio;Accessibility;
 StartupNotify=true
 EOF
@@ -383,6 +437,7 @@ Installed paths:
   Config:   ${CONFIG_ROOT}/config.yaml
   Logs:     ${LOG_DIR}
   Command:  ${WRAPPER_PATH}
+  GUI:      ${DESKTOP_WRAPPER_PATH}
   Service:  hey-ghost.service
 
 Start and test HeyGhost:
@@ -392,7 +447,9 @@ Start and test HeyGhost:
 
 Desktop launcher:
   A HeyGhost icon was created on the desktop for the user who ran sudo.
+  Double-click it to open the GhostWave GUI, then click the window or press Space to start listening.
   If your desktop asks for permission, choose "Allow Launching" or "Trust and Launch".
+  Launch logs are written to ~/.local/state/heyghost/desktop-launch.log.
 
 Useful commands:
   heyghost debug-window
@@ -409,6 +466,7 @@ run_dependency_installer
 create_service_user
 install_files
 install_wrapper
+install_desktop_wrapper
 install_service
 enable_service
 create_desktop_icon

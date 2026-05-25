@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import signal
 import subprocess
 import sys
@@ -686,9 +687,30 @@ def _status_systemctl() -> int:
     return 1
 
 
+def prepare_desktop_config(config: AppConfig) -> AppConfig:
+    state_root = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local' / 'state')) / 'heyghost'
+    data_root = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local' / 'share')) / 'heyghost'
+    shared_dir = state_root / 'shared'
+    log_dir = state_root / 'logs'
+    knowledge_dir = data_root / 'knowledge'
+
+    for directory in (shared_dir, log_dir, knowledge_dir):
+        directory.mkdir(parents=True, exist_ok=True)
+
+    config.tts.speaker_wav_path = str(shared_dir / 'heyghost_response.wav')
+    config.wake_word.dev_trigger_file = str(shared_dir / 'heyghost_wake')
+    config.conversation.memory_path = str(shared_dir / 'conversation-memory.sqlite3')
+    config.logging.log_file = str(log_dir / 'hey-ghost.log')
+    config.logging.debug_events_file = str(shared_dir / 'debug-events.jsonl')
+    config.rag.index_path = str(shared_dir / 'rag-index.sqlite3')
+    config.rag.knowledge_dir = str(knowledge_dir)
+    return config
+
+
 def run_desktop_session(config: AppConfig) -> int:
     from heyghost.debug_window import run_debug_window
 
+    config = prepare_desktop_config(config)
     app = GhostApp(config)
     app_error: list[BaseException] = []
 

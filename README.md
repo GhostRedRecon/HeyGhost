@@ -226,7 +226,9 @@ After installation, HeyGhost can be used in three main ways:
 | --- | --- | --- |
 | Background service | `heyghost start` | Daily use after setup. |
 | Manual trigger | `heyghost trigger` | Testing the assistant without wake-word tuning. |
-| Visual desktop mode | `heyghost desktop` | Seeing transcripts, state, and responses in the GhostWave UI. |
+| Visual desktop mode | Double-click the HeyGhost desktop icon or run `heyghost desktop` | Seeing transcripts, state, and responses in the GhostWave UI. |
+
+The desktop icon opens the GhostWave GUI. Click inside the window or press Space to start a listening session. If the icon does not open, check `~/.local/state/heyghost/desktop-launch.log` for the launch error.
 
 Basic flow:
 

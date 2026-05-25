@@ -133,6 +133,19 @@ class GhostWaveWindow:
         threading.Thread(target=self._run_trigger, daemon=True).start()
 
     def _run_trigger(self) -> None:
+        if self.standalone:
+            try:
+                wake_path = Path(self.config.wake_word.dev_trigger_file)
+                session_path = wake_path.with_name("heyghost_session")
+                wake_path.parent.mkdir(parents=True, exist_ok=True)
+                session_path.unlink(missing_ok=True)
+                wake_path.write_text("wake\n", encoding="utf-8")
+                self.root.after(0, lambda: self.renderer.handle_debug_event({"event": "session_started", "text": "Listening"}))
+            except OSError as exc:
+                self.root.after(0, lambda: self.renderer.handle_debug_event({"event": "error", "text": str(exc)}))
+            self.root.after(0, self._finish_trigger)
+            return
+
         try:
             result = subprocess.run(
                 [
