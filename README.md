@@ -160,13 +160,21 @@ Run the tests before installing:
 python3 tests/run_tests.py
 ```
 
+Install external dependencies automatically:
+
+```bash
+sudo ./scripts/install_dependencies.sh
+```
+
+This installs system packages, Ollama models, whisper.cpp, Whisper models, Piper, and the default Piper voice into the paths HeyGhost expects. If you prefer to install those tools manually, follow the steps below.
+
 Install HeyGhost as a system service:
 
 ```bash
 sudo ./install.sh
 ```
 
-Install Ollama models:
+Install Ollama models manually:
 
 ```bash
 ollama pull qwen2.5:0.5b
