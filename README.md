@@ -312,6 +312,20 @@ If HeyGhost helps you, you can support development here:
 
 [Buy me a coffee](https://buymeacoffee.com/navnish)
 
+## Acknowledgements
+
+HeyGhost is possible because of excellent open-source and local-first AI projects. Special thanks to:
+
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) and OpenAI Whisper for local speech-to-text.
+- [Piper](https://github.com/rhasspy/piper) for fast local text-to-speech.
+- [Ollama](https://ollama.com/) for making local LLMs easy to run and test.
+- [WebRTC VAD](https://github.com/wiseman/py-webrtcvad) for lightweight voice activity detection.
+- [SoundDevice](https://python-sounddevice.readthedocs.io/) and PortAudio for microphone/audio integration.
+- [PyYAML](https://pyyaml.org/) for configuration loading.
+- The Python and Linux open-source communities that make local assistant projects like this practical.
+
+These projects belong to their respective authors and maintainers. HeyGhost integrates with them but is not affiliated with or endorsed by them.
+
 ## License
 
 HeyGhost is released under the [MIT License](LICENSE).
