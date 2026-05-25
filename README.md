@@ -202,6 +202,131 @@ Open the debug UI:
 heyghost debug-window
 ```
 
+## How To Use HeyGhost
+
+After installation, HeyGhost can be used in three main ways:
+
+| Mode | Command | Best For |
+| --- | --- | --- |
+| Background service | `heyghost start` | Daily use after setup. |
+| Manual trigger | `heyghost trigger` | Testing the assistant without wake-word tuning. |
+| Visual desktop mode | `heyghost desktop` | Seeing transcripts, state, and responses in the GhostWave UI. |
+
+Basic flow:
+
+1. Start the service:
+
+   ```bash
+   heyghost start
+   ```
+
+2. Trigger a listening session:
+
+   ```bash
+   heyghost trigger
+   ```
+
+3. Speak a short request clearly.
+
+4. HeyGhost transcribes, routes, answers, and speaks the response locally.
+
+5. Check service status or logs if something does not work:
+
+   ```bash
+   heyghost status
+   journalctl -u hey-ghost.service -f
+   ```
+
+## Example Questions And Voice Commands
+
+Use short, direct phrases for the best response time. These examples show the type of things HeyGhost is designed to handle.
+
+### System Information
+
+| Ask HeyGhost | What It Does |
+| --- | --- |
+| `what time is it` | Speaks the current local time. |
+| `how much memory do I have` | Reports RAM information. |
+| `which CPU is this` | Reports processor information. |
+| `show disk space` | Reports disk usage. |
+| `what operating system is running` | Reports OS details. |
+| `system status` | Gives a short system status summary. |
+| `what USB devices are connected` | Lists visible USB devices. |
+| `what is my IP address` | Reports active network interface addresses. |
+
+### Linux And Desktop Helpers
+
+| Ask HeyGhost | What It Does |
+| --- | --- |
+| `open terminal` | Opens a terminal action through the desktop flow. |
+| `open browser` | Opens the default browser. |
+| `open google dot com` | Opens a website. |
+| `search the web for local AI tools` | Opens a web search. |
+| `open file manager` | Opens the default file manager if available. |
+| `open calculator` | Opens a calculator app if installed. |
+| `what Linux tools are installed` | Summarizes common visible command-line tools. |
+
+### Local AI And Model Questions
+
+| Ask HeyGhost | What It Does |
+| --- | --- |
+| `which model are you using` | Reports the configured Ollama model. |
+| `what can you do` | Summarizes assistant capabilities. |
+| `show your LLM capabilities` | Lists local model-assisted features. |
+| `make that shorter` | Shortens the previous assistant response. |
+| `explain that result` | Explains the previous local skill result. |
+| `classify this request: open browser` | Demonstrates local request classification. |
+
+### Local Knowledge And RAG
+
+After adding documents to the configured knowledge directory and running `heyghost index-rag`, you can ask source-backed local document questions.
+
+| Ask HeyGhost | What It Does |
+| --- | --- |
+| `search your local knowledge for USB microphone` | Searches indexed local documents. |
+| `search local knowledge for install notes` | Looks for matching local notes. |
+| `search your local knowledge for Ollama setup` | Answers from local indexed files when sources exist. |
+
+Refresh the local knowledge index:
+
+```bash
+heyghost index-rag
+```
+
+### Educational Topics
+
+HeyGhost includes local answer banks and domain routing for short educational explanations.
+
+| Ask HeyGhost | What It Does |
+| --- | --- |
+| `what is cybersecurity` | Gives a defensive educational explanation. |
+| `what is phishing` | Explains the concept safely. |
+| `how do I make SSH safer` | Gives defensive security guidance. |
+| `what is yoga` | Gives a short wellness explanation. |
+| `give me a beginner yoga tip` | Gives general wellness guidance. |
+| `what is robotics` | Explains robotics at a high level. |
+
+### Debugging And Testing Commands
+
+These are terminal commands, not voice questions:
+
+| Command | Purpose |
+| --- | --- |
+| `heyghost test-ollama` | Tests the local Ollama connection. |
+| `heyghost test-tts` | Tests Piper speech output. |
+| `heyghost debug-window` | Opens the GhostWave diagnostics window. |
+| `heyghost replay tests/fixtures/transcripts.jsonl` | Replays transcript fixtures through routing. |
+| `python3 tests/run_tests.py` | Runs the lightweight test suite. |
+
+### Tips For Better Results
+
+- Keep voice commands short and specific.
+- Use the manual trigger while testing your microphone and models.
+- Start with `qwen2.5:0.5b` on low-power hardware.
+- Use `heyghost status` and `journalctl -u hey-ghost.service -f` when debugging.
+- Keep cybersecurity requests defensive, educational, and authorized.
+- Do not expect HeyGhost to run arbitrary LLM-generated shell commands; that is intentionally blocked for safety.
+
 ## Configuration
 
 The config loader checks paths in this order:
