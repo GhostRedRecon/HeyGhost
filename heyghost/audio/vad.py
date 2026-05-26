@@ -11,15 +11,18 @@ class VoiceActivityDetector:
     def __init__(self, aggressiveness: int = 3, backend: str = "webrtc") -> None:
         self.backend = backend
         self.energy_threshold = 140
+        self._vad = None
         if backend == "silero":
             self._vad = SileroVAD(aggressiveness)
-        else:
+        elif backend != "energy":
             self._vad = WebRTCVAD(aggressiveness)
 
     def is_speech(self, frame: bytes, sample_rate: int) -> bool:
-        if self._vad.is_speech(frame, sample_rate):
-            return True
-        return self._energy_is_speech(frame)
+        if self.backend == "energy":
+            return self._energy_is_speech(frame)
+        if self._vad is None:
+            return False
+        return self._vad.is_speech(frame, sample_rate)
 
     def _energy_is_speech(self, frame: bytes) -> bool:
         samples = array("h")

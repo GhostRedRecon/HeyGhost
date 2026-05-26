@@ -225,6 +225,9 @@ class GhostApp:
         )
         self.current_turn_id = ''
         self._last_response_timing: dict[str, float] = {}
+        self._last_spoken_text = ''
+        self._ignore_self_audio_until = 0.0
+        self._active_conversation_until = 0.0
 
     def stop(self, *_args) -> None:
         self.logger.info('Stopping Hey Ghost')
@@ -258,6 +261,8 @@ class GhostApp:
                 try:
                     self._interaction_cycle(continuous=True)
                 except Exception as exc:
+                    if not self.running:
+                        break
                     self.logger.exception('Always-listening cycle failed: %s', exc)
                     self.debug_events.emit('error', text=f'Always-listening cycle failed: {exc}')
                     time.sleep(2.0)
@@ -407,6 +412,44 @@ class GhostApp:
                 self.state = AssistantState.FOLLOW_UP_LISTENING
                 continue
 
+            if self._looks_like_self_echo(text):
+                empty_turns += 1
+                self.logger.info('Ignored likely self-audio transcript: %s', text)
+                self._emit_turn_event('self_audio_ignored', text=text)
+                if continuous:
+                    self.state = AssistantState.FOLLOW_UP_LISTENING
+                    continue
+                if empty_turns >= 2:
+                    self._emit_turn_event('session_idle')
+                    return
+                if follow_up_until is not None and time.time() >= follow_up_until:
+                    self._emit_turn_event('session_idle')
+                    return
+                self.state = AssistantState.FOLLOW_UP_LISTENING
+                continue
+
+            if not self._has_attention(
+                text,
+                raw_text=transcript.text,
+                correction_reason=correction.reason,
+                continuous=continuous,
+            ):
+                empty_turns += 1
+                self.logger.info('Ignored background transcript: %s', text)
+                self._emit_turn_event('attention_ignored', text=text)
+                if continuous:
+                    self.state = AssistantState.FOLLOW_UP_LISTENING
+                    continue
+                if empty_turns >= 2:
+                    self._emit_turn_event('session_idle')
+                    return
+                if follow_up_until is not None and time.time() >= follow_up_until:
+                    self._emit_turn_event('session_idle')
+                    return
+                self.state = AssistantState.FOLLOW_UP_LISTENING
+                continue
+
+            self._mark_conversation_active()
             self.logger.info('User said: %s', text)
             empty_turns = 0
             self._emit_turn_event(
@@ -580,6 +623,88 @@ class GhostApp:
         filler_count = sum(1 for word in words if word in {'the', 'of', 'to', 'for', 'and', 'a'})
         return len(words) >= 5 and filler_count / len(words) > 0.55
 
+    def _has_attention(
+        self,
+        text: str,
+        *,
+        raw_text: str = '',
+        correction_reason: str = '',
+        continuous: bool = False,
+    ) -> bool:
+        if not continuous:
+            return True
+        if correction_reason == 'wake_phrase_removed':
+            return True
+        if self._is_simple_wake_phrase(text):
+            return True
+        if time.monotonic() <= self._active_conversation_until:
+            return True
+
+        normalized_raw = ' '.join(raw_text.lower().replace(',', ' ').replace('.', ' ').split())
+        wake_phrase = self.config.assistant.wake_phrase.lower() if hasattr(self, 'config') else 'hey ghost'
+        if wake_phrase and wake_phrase in normalized_raw:
+            return True
+        if any(phrase in normalized_raw for phrase in ('hey ghost', 'hello ghost', 'hi ghost', 'ghost')):
+            return True
+
+        return self._looks_like_direct_assistant_request(text)
+
+    def _looks_like_direct_assistant_request(self, text: str) -> bool:
+        words = self._normalized_tokens(text)
+        if not words or len(words) > 16:
+            return False
+        normalized = ' '.join(words)
+        direct_phrases = {
+            'what time is it',
+            'what are your capabilities',
+            'what can you do',
+            'system status',
+            'show disk space',
+            'show memory',
+            'open terminal',
+            'open browser',
+            'close terminal',
+        }
+        if normalized in direct_phrases:
+            return True
+        question_starts = {'what', 'why', 'how', 'who', 'when', 'where', 'can', 'could', 'is', 'are', 'do'}
+        command_starts = {'open', 'close', 'run', 'start', 'stop', 'tell', 'show', 'search', 'list'}
+        if words[0] in command_starts:
+            return True
+        if words[0] not in question_starts:
+            return False
+        assistant_terms = {
+            'time', 'date', 'memory', 'ram', 'cpu', 'disk', 'space', 'system', 'status',
+            'model', 'capabilities', 'ability', 'linux', 'usb', 'ip', 'address', 'browser',
+            'terminal', 'cybersecurity', 'cyber', 'security', 'vpn', 'phishing', 'spyware',
+            'yoga', 'robotics',
+        }
+        return any(word in assistant_terms for word in words[1:])
+
+    def _mark_conversation_active(self) -> None:
+        timeout = max(3, int(self.config.assistant.follow_up_timeout_seconds))
+        self._active_conversation_until = time.monotonic() + timeout
+
+    def _looks_like_self_echo(self, text: str) -> bool:
+        if time.monotonic() > self._ignore_self_audio_until:
+            return False
+        spoken_tokens = self._normalized_tokens(self._last_spoken_text)
+        heard_tokens = self._normalized_tokens(text)
+        if len(spoken_tokens) < 3 or len(heard_tokens) < 3:
+            return False
+
+        spoken_text = ' '.join(spoken_tokens)
+        heard_text = ' '.join(heard_tokens)
+        if spoken_text in heard_text or heard_text in spoken_text:
+            return True
+
+        overlap = len(set(spoken_tokens) & set(heard_tokens))
+        return overlap / max(1, min(len(set(spoken_tokens)), len(set(heard_tokens)))) >= 0.6
+
+    def _normalized_tokens(self, text: str) -> list[str]:
+        cleaned = ''.join(char.lower() if char.isalnum() else ' ' for char in text)
+        return [word for word in cleaned.split() if len(word) > 1]
+
     def _is_simple_wake_phrase(self, text: str) -> bool:
         normalized = ' '.join(text.lower().replace(',', ' ').replace('.', ' ').split())
         return normalized in {
@@ -634,6 +759,12 @@ class GhostApp:
         self.debug_events.emit('assistant_text', text=text)
         try:
             timing = self.tts.speak(text)
+            self._last_spoken_text = text
+            self._mark_conversation_active()
+            self._ignore_self_audio_until = time.monotonic() + max(
+                2.0,
+                self.config.audio.silence_timeout_ms / 1000.0,
+            )
             if isinstance(timing, dict):
                 return timing
         except Exception as exc:

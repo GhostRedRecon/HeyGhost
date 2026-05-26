@@ -173,7 +173,7 @@ class GhostWaveRenderer:
         self.diagnostics.build()
         self.diagnostics.update("version", __version__)
         self.diagnostics.update("model", getattr(getattr(self.config, "llm", None), "model", ""))
-        self.diagnostics.set_visible(getattr(self.gui_config, "diagnostics_default", True))
+        self.diagnostics.set_visible(False)
         self._start_startup_diagnostics()
         self.tick()
 
@@ -250,15 +250,10 @@ class GhostWaveRenderer:
         elif name == "turn_timing":
             self.set_metrics(event)
         elif name in {"low_confidence", "no_speech"}:
-            self.set_state("uncertain")
-            if name == "no_speech":
-                self.diagnostics.update(
-                    "last error",
-                    f"no speech detected; max audio {float(event.get('max_audio_level', 0.0) or 0.0):.2f}",
-                )
+            return
         elif name == "error":
             self.set_state("error")
-            self.status = text[:80] or STATE_LABELS["error"]
+            self.status = STATE_LABELS["error"]
             self.diagnostics.update("last error", text)
 
     def toggle_diagnostics(self) -> None:
@@ -286,7 +281,8 @@ class GhostWaveRenderer:
 
         self.canvas.configure(bg=self.theme.background)
         self._render_brand(center_x, max(34, int(height * 0.10)))
-        self._render_health_indicators(width)
+        if bool(getattr(self.gui_config, "show_health_indicators", False)):
+            self._render_health_indicators(width)
         spacing = wave_width / max(1, self.bar_count - 1)
         start_x = center_x - wave_width / 2
         amplitude = self._state_amplitude()
