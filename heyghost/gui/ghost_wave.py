@@ -2,9 +2,14 @@ from __future__ import annotations
 
 import math
 import random
+import shutil
+import subprocess
+import threading
 import time
 import tkinter as tk
+from pathlib import Path
 
+from heyghost import __version__
 from heyghost.gui.command_console import CommandConsole
 from heyghost.gui.diagnostics import DiagnosticsPanel
 from heyghost.gui.theme import build_theme, dim_color
@@ -19,7 +24,7 @@ STATE_LABELS = {
     "thinking": "Thinking...",
     "speaking": "Speaking...",
     "follow_up_listening": "Listening for follow-up...",
-    "uncertain": "I may have misheard",
+    "uncertain": "No clear speech detected",
     "error": "Local error",
 }
 
@@ -37,7 +42,15 @@ class GhostWaveRenderer:
         self.bar_count = max(16, min(96, self.bar_count))
         self.state = "idle"
         self.status = STATE_LABELS["idle"]
+        self.version_label = f"HeyGhost v{__version__}"
         self.model_label = f"Ollama: {getattr(getattr(config, 'llm', None), 'model', 'local model')}"
+        self.health: dict[str, str] = {
+            "mic": "checking",
+            "speaker": "checking",
+            "ollama": "checking",
+            "stt": "checking",
+            "tts": "checking",
+        }
         self.user_text = ""
         self.assistant_text = ""
         self.audio_level = 0.0
@@ -97,6 +110,23 @@ class GhostWaveRenderer:
             font=("Impact", 24),
             anchor="center",
         )
+        self.items["version"] = self.canvas.create_text(
+            0,
+            0,
+            text=self.version_label,
+            fill=dim_color(self.theme.colors["text_secondary"], 0.82),
+            font=(self.theme.font_family, 10),
+            anchor="nw",
+        )
+        for key in ("mic", "speaker", "ollama", "stt", "tts"):
+            self.items[f"health_{key}"] = self.canvas.create_text(
+                0,
+                0,
+                text="",
+                fill=self.theme.colors["text_secondary"],
+                font=(self.theme.font_family, 10),
+                anchor="nw",
+            )
         inactive = dim_color(self.theme.colors["idle"], 0.6)
         for _idx in range(self.bar_count):
             self.bars.append(
@@ -141,8 +171,10 @@ class GhostWaveRenderer:
             anchor="center",
         )
         self.diagnostics.build()
+        self.diagnostics.update("version", __version__)
         self.diagnostics.update("model", getattr(getattr(self.config, "llm", None), "model", ""))
-        self.diagnostics.set_visible(getattr(self.gui_config, "diagnostics_default", False))
+        self.diagnostics.set_visible(getattr(self.gui_config, "diagnostics_default", True))
+        self._start_startup_diagnostics()
         self.tick()
 
     def set_state(self, state: str) -> None:
@@ -161,6 +193,7 @@ class GhostWaveRenderer:
     def set_audio_level(self, level: float) -> None:
         self.audio_level = max(0.0, min(float(level), 1.0))
         self.last_audio_time = time.monotonic()
+        self.diagnostics.update("audio level", f"{self.audio_level:.2f}")
 
     def set_metrics(self, metrics: dict) -> None:
         self.metrics = dict(metrics)
@@ -248,6 +281,7 @@ class GhostWaveRenderer:
 
         self.canvas.configure(bg=self.theme.background)
         self._render_brand(center_x, max(34, int(height * 0.10)))
+        self._render_health_indicators(width)
         spacing = wave_width / max(1, self.bar_count - 1)
         start_x = center_x - wave_width / 2
         amplitude = self._state_amplitude()
@@ -292,6 +326,95 @@ class GhostWaveRenderer:
             self.canvas.itemconfig(self.items["micro"], text="")
         self.diagnostics.render(width, height)
         self.command_console.render(width, height)
+
+
+    def _start_startup_diagnostics(self) -> None:
+        def worker() -> None:
+            statuses = self._collect_startup_diagnostics()
+            self.root.after(0, lambda: self._apply_startup_diagnostics(statuses))
+
+        threading.Thread(target=worker, name="heyghost-gui-diagnostics", daemon=True).start()
+
+    def _collect_startup_diagnostics(self) -> dict[str, str]:
+        statuses: dict[str, str] = {}
+        audio_config = getattr(self.config, "audio", None)
+        stt_config = getattr(self.config, "stt", None)
+        tts_config = getattr(self.config, "tts", None)
+        llm_config = getattr(self.config, "llm", None)
+
+        try:
+            import sounddevice as sd
+
+            devices = sd.query_devices()
+            input_count = sum(1 for device in devices if int(device.get("max_input_channels", 0)) > 0)
+            output_count = sum(1 for device in devices if int(device.get("max_output_channels", 0)) > 0)
+            input_device = getattr(audio_config, "input_device", None)
+            output_device = getattr(audio_config, "output_device", None)
+            if input_device is not None:
+                device = sd.query_devices(input_device)
+                statuses["mic"] = "ok" if int(device.get("max_input_channels", 0)) > 0 else "bad device"
+            else:
+                statuses["mic"] = "ok" if input_count else "not found"
+            if output_device is not None:
+                device = sd.query_devices(output_device)
+                statuses["speaker"] = "ok" if int(device.get("max_output_channels", 0)) > 0 else "bad device"
+            else:
+                statuses["speaker"] = "ok" if output_count else "not found"
+        except Exception as exc:
+            statuses["mic"] = f"error: {exc}"
+            statuses["speaker"] = f"error: {exc}"
+
+        stt_binary = Path(str(getattr(stt_config, "binary_path", "")))
+        stt_model = Path(str(getattr(stt_config, "model_path", "")))
+        statuses["stt"] = "ok" if stt_binary.exists() and stt_model.exists() else "missing files"
+
+        tts_binary = Path(str(getattr(tts_config, "binary_path", "")))
+        tts_model = Path(str(getattr(tts_config, "model_path", "")))
+        playback_ready = shutil.which("aplay") or shutil.which("pw-play")
+        statuses["tts"] = "ok" if tts_binary.exists() and tts_model.exists() and playback_ready else "missing files/playback"
+
+        try:
+            result = subprocess.run(["ollama", "list"], check=False, capture_output=True, text=True, timeout=3)
+            model = str(getattr(llm_config, "model", ""))
+            if result.returncode == 0 and (not model or model in result.stdout):
+                statuses["ollama"] = "ok"
+            elif result.returncode == 0:
+                statuses["ollama"] = f"model missing: {model}"
+            else:
+                statuses["ollama"] = "not responding"
+        except Exception as exc:
+            statuses["ollama"] = f"error: {exc}"
+
+        return statuses
+
+    def _apply_startup_diagnostics(self, statuses: dict[str, str]) -> None:
+        for key, value in statuses.items():
+            if key in self.health:
+                self.health[key] = value
+        self.diagnostics.update("mic", self.health["mic"])
+        self.diagnostics.update("speaker", self.health["speaker"])
+        self.diagnostics.update("ollama", self.health["ollama"])
+        self.diagnostics.update("stt ready", self.health["stt"])
+        self.diagnostics.update("tts ready", self.health["tts"])
+        problems = [f"{key}: {value}" for key, value in self.health.items() if value != "ok"]
+        self.diagnostics.update("last error", "; ".join(problems))
+
+    def _render_health_indicators(self, width: int) -> None:
+        x = 18
+        y = 16
+        self.canvas.coords(self.items["version"], x, y)
+        self.canvas.itemconfig(self.items["version"], text=self.version_label)
+        y += 22
+        for key in ("mic", "speaker", "ollama", "stt", "tts"):
+            value = self.health[key]
+            color = self.theme.colors["wake_detected"] if value == "ok" else self.theme.colors["uncertain"]
+            if value.startswith("error") or value.startswith("missing") or value in {"not found", "not responding", "bad device"}:
+                color = self.theme.colors["error"]
+            label = f"{key.upper()}: {value}"
+            item = self.items[f"health_{key}"]
+            self.canvas.coords(item, x, y)
+            self.canvas.itemconfig(item, text=label, fill=color)
+            y += 20
 
     def shutdown(self) -> None:
         if self.tick_job is not None:

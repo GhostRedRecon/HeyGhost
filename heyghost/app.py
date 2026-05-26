@@ -168,6 +168,7 @@ class GhostApp:
             preroll_ms=config.audio.preroll_ms,
             on_speech_started=lambda: self._emit_turn_event('speech_started'),
             on_speech_ended=lambda: self._emit_turn_event('speech_ended'),
+            on_audio_level=lambda level: self.debug_events.emit('audio_level', level=round(level, 3)),
         )
         if config.stt.engine == 'vosk':
             from heyghost.stt.vosk_stt import VoskSTT
@@ -309,6 +310,12 @@ class GhostApp:
             record_timing = dict(getattr(self.recorder, 'last_timing', {}))
             if not wav_path:
                 empty_turns += 1
+                self._emit_turn_event(
+                    'no_speech',
+                    reason='no_voice_detected',
+                    recording_ms=round(record_timing.get('recording_ms', 0.0), 1),
+                    speech_ms=round(record_timing.get('speech_ms', 0.0), 1),
+                )
                 if continuous:
                     self.state = AssistantState.FOLLOW_UP_LISTENING
                     continue

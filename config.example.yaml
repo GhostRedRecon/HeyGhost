@@ -73,7 +73,7 @@ audio:
   max_record_seconds: 4
   preroll_ms: 180
   vad_backend: "webrtc"
-  vad_aggressiveness: 3
+  vad_aggressiveness: 2
 
 wake_word:
   engine: "always_on"
@@ -135,7 +135,7 @@ gui:
   title_font_size: 24
   status_font_size: 14
   transcript_font_size: 12
-  diagnostics_default: false
+  diagnostics_default: true
 
   ghost_wave:
     waveform_bars: 64

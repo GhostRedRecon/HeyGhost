@@ -9,7 +9,14 @@ class DiagnosticsPanel:
         self.theme = theme
         self.visible = False
         self.values: dict[str, str] = {
+            "version": "",
             "state": "idle",
+            "mic": "checking",
+            "speaker": "checking",
+            "ollama": "checking",
+            "stt ready": "checking",
+            "tts ready": "checking",
+            "audio level": "0.00",
             "raw transcript": "",
             "corrected": "",
             "route": "",
@@ -69,7 +76,7 @@ class DiagnosticsPanel:
         if self.panel is None:
             return
         panel_w = min(430, max(300, int(width * 0.42)))
-        panel_h = 230
+        panel_h = min(height - 40, 42 + 22 * len(self.values))
         x0 = width - panel_w - 20
         y0 = height - panel_h - 20
         x1 = width - 20

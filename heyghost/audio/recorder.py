@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import sys
 import tempfile
 import time
 import wave
+from array import array
 from collections import deque
 from collections.abc import Callable
 from pathlib import Path
@@ -25,6 +27,7 @@ class Recorder:
         preroll_ms: int = 300,
         on_speech_started: Callable[[], None] | None = None,
         on_speech_ended: Callable[[], None] | None = None,
+        on_audio_level: Callable[[float], None] | None = None,
     ) -> None:
         self.audio_input = audio_input
         self.vad = vad
@@ -40,7 +43,9 @@ class Recorder:
         self.preroll_frames = max(0, self.preroll_ms // self.frame_duration_ms)
         self.on_speech_started = on_speech_started
         self.on_speech_ended = on_speech_ended
+        self.on_audio_level = on_audio_level
         self.last_timing: dict[str, float] = {}
+        self._last_audio_level_emit = 0.0
 
     def record_until_silence(self) -> str | None:
         started = time.perf_counter()
@@ -57,6 +62,7 @@ class Recorder:
                 if overflowed:
                     continue
 
+                self._emit_audio_level(frame)
                 speech = self.vad.is_speech(frame, self.sample_rate)
                 if speech:
                     if not heard_speech and preroll_buffer:
@@ -95,6 +101,28 @@ class Recorder:
         Path(output_path).unlink(missing_ok=True)
         self._write_wav(output_path, speech_frames)
         return output_path
+
+
+    def _emit_audio_level(self, frame: bytes) -> None:
+        if self.on_audio_level is None:
+            return
+        now = time.perf_counter()
+        if now - self._last_audio_level_emit < 0.12:
+            return
+        self._last_audio_level_emit = now
+
+        samples = array("h")
+        samples.frombytes(frame)
+        if sys.byteorder != "little":
+            samples.byteswap()
+        if not samples:
+            self.on_audio_level(0.0)
+            return
+
+        rms = (sum(sample * sample for sample in samples) / len(samples)) ** 0.5
+        # Scale quiet laptop microphones into a useful visual range while clipping noise.
+        level = min(1.0, rms / 6000.0)
+        self.on_audio_level(level)
 
     def _write_wav(self, path: str, frames: list[bytes]) -> None:
         with wave.open(path, "wb") as wav_file:
