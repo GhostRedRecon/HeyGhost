@@ -315,6 +315,7 @@ class GhostApp:
                     reason='no_voice_detected',
                     recording_ms=round(record_timing.get('recording_ms', 0.0), 1),
                     speech_ms=round(record_timing.get('speech_ms', 0.0), 1),
+                    max_audio_level=round(record_timing.get('max_audio_level', 0.0), 3),
                 )
                 if continuous:
                     self.state = AssistantState.FOLLOW_UP_LISTENING

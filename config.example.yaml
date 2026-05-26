@@ -67,8 +67,8 @@ audio:
   channels: 1
   input_device: null
   output_device: null
-  silence_timeout_ms: 350
-  min_speech_ms: 250
+  silence_timeout_ms: 700
+  min_speech_ms: 120
   frame_duration_ms: 30
   max_record_seconds: 4
   preroll_ms: 180

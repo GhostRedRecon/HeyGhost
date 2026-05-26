@@ -54,6 +54,7 @@ class Recorder:
         silence_frames = 0
         speech_ms = 0
         heard_speech = False
+        max_audio_level = 0.0
         silence_limit = max(1, self.silence_timeout_ms // self.frame_duration_ms)
 
         with self.audio_input.open_stream(blocksize=self.frame_size) as stream:
@@ -62,7 +63,9 @@ class Recorder:
                 if overflowed:
                     continue
 
-                self._emit_audio_level(frame)
+                audio_level = self._audio_level(frame)
+                max_audio_level = max(max_audio_level, audio_level)
+                self._emit_audio_level(audio_level)
                 speech = self.vad.is_speech(frame, self.sample_rate)
                 if speech:
                     if not heard_speech and preroll_buffer:
@@ -92,6 +95,7 @@ class Recorder:
             "recording_ms": total_ms,
             "speech_ms": float(speech_ms),
             "silence_wait_ms": float(silence_wait_ms),
+            "max_audio_level": float(max_audio_level),
         }
 
         if not heard_speech or speech_ms < self.min_speech_ms:
@@ -103,25 +107,24 @@ class Recorder:
         return output_path
 
 
-    def _emit_audio_level(self, frame: bytes) -> None:
+    def _audio_level(self, frame: bytes) -> float:
+        samples = array("h")
+        samples.frombytes(frame)
+        if sys.byteorder != "little":
+            samples.byteswap()
+        if not samples:
+            return 0.0
+        rms = (sum(sample * sample for sample in samples) / len(samples)) ** 0.5
+        # Scale quiet laptop microphones into a useful visual range while clipping noise.
+        return min(1.0, rms / 6000.0)
+
+    def _emit_audio_level(self, level: float) -> None:
         if self.on_audio_level is None:
             return
         now = time.perf_counter()
         if now - self._last_audio_level_emit < 0.12:
             return
         self._last_audio_level_emit = now
-
-        samples = array("h")
-        samples.frombytes(frame)
-        if sys.byteorder != "little":
-            samples.byteswap()
-        if not samples:
-            self.on_audio_level(0.0)
-            return
-
-        rms = (sum(sample * sample for sample in samples) / len(samples)) ** 0.5
-        # Scale quiet laptop microphones into a useful visual range while clipping noise.
-        level = min(1.0, rms / 6000.0)
         self.on_audio_level(level)
 
     def _write_wav(self, path: str, frames: list[bytes]) -> None:
