@@ -50,11 +50,14 @@ class Recorder:
     def record_until_silence(self) -> str | None:
         started = time.perf_counter()
         speech_frames: list[bytes] = []
+        fallback_frames: list[bytes] = []
         preroll_buffer: deque[bytes] = deque(maxlen=self.preroll_frames)
         silence_frames = 0
         speech_ms = 0
         heard_speech = False
         max_audio_level = 0.0
+        fallback_audio_ms = 0
+        fallback_level_threshold = 0.012
         silence_limit = max(1, self.silence_timeout_ms // self.frame_duration_ms)
 
         with self.audio_input.open_stream(blocksize=self.frame_size) as stream:
@@ -66,6 +69,12 @@ class Recorder:
                 audio_level = self._audio_level(frame)
                 max_audio_level = max(max_audio_level, audio_level)
                 self._emit_audio_level(audio_level)
+                if audio_level >= fallback_level_threshold:
+                    fallback_frames.append(frame)
+                    fallback_audio_ms += self.frame_duration_ms
+                elif not heard_speech and fallback_frames:
+                    fallback_frames.append(frame)
+
                 speech = self.vad.is_speech(frame, self.sample_rate)
                 if speech:
                     if not heard_speech and preroll_buffer:
@@ -96,10 +105,16 @@ class Recorder:
             "speech_ms": float(speech_ms),
             "silence_wait_ms": float(silence_wait_ms),
             "max_audio_level": float(max_audio_level),
+            "fallback_audio_ms": float(fallback_audio_ms),
         }
 
         if not heard_speech or speech_ms < self.min_speech_ms:
-            return None
+            if fallback_audio_ms < self.min_speech_ms or not fallback_frames:
+                return None
+            speech_frames = fallback_frames
+            speech_ms = fallback_audio_ms
+            self.last_timing["speech_ms"] = float(speech_ms)
+            self.last_timing["fallback_recording"] = 1.0
 
         fd, output_path = tempfile.mkstemp(prefix="heyghost_input_", suffix=".wav")
         Path(output_path).unlink(missing_ok=True)

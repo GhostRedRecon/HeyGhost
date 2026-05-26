@@ -420,7 +420,7 @@ config.setdefault("gui", {})["diagnostics_default"] = True
 config.setdefault("audio", {})["sample_rate"] = 48000
 config.setdefault("audio", {})["vad_aggressiveness"] = 2
 config.setdefault("audio", {})["silence_timeout_ms"] = 700
-config.setdefault("audio", {})["min_speech_ms"] = 120
+config.setdefault("audio", {})["min_speech_ms"] = 90
 
 with path.open("w", encoding="utf-8") as handle:
     yaml.safe_dump(config, handle, sort_keys=False)

@@ -10,7 +10,7 @@ from heyghost.audio.vad_webrtc import WebRTCVAD
 class VoiceActivityDetector:
     def __init__(self, aggressiveness: int = 3, backend: str = "webrtc") -> None:
         self.backend = backend
-        self.energy_threshold = 450
+        self.energy_threshold = 140
         if backend == "silero":
             self._vad = SileroVAD(aggressiveness)
         else:
