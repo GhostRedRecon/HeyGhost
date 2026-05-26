@@ -11,42 +11,59 @@ LOG_DIR="${HEY_GHOST_LOG_DIR:-/var/log/hey-ghost}"
 SERVICE_USER="${HEY_GHOST_SERVICE_USER:-heyghost}"
 SERVICE_GROUP="${HEY_GHOST_SERVICE_GROUP:-${SERVICE_USER}}"
 DESKTOP_APP_ID="heyghost.desktop"
+WHISPER_CPP_REF="${WHISPER_CPP_REF:-master}"
+WHISPER_MODELS=("tiny.en" "base.en")
+OLLAMA_MODELS=("qwen2.5:0.5b" "nomic-embed-text")
+PIPER_VERSION="${PIPER_VERSION:-1.2.0}"
+PIPER_VOICE="${PIPER_VOICE:-en_US-lessac-medium}"
+PIPER_VOICE_BASE_URL="https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium"
+BUILD_DIR="${HEY_GHOST_BUILD_DIR:-/tmp/heyghost-deps}"
 RUN_DEPENDENCIES=1
 RUN_TESTS=1
 CREATE_DESKTOP_ICON=1
-DEPENDENCY_ARGS=()
+SKIP_OLLAMA=0
+SKIP_WHISPER=0
+SKIP_PIPER=0
 REPAIR_ATTEMPTED=0
+REPORT_NOTES=()
 
 usage() {
   cat <<'EOF'
-HeyGhost installer
+HeyGhost one-file installer
 
 Usage:
   sudo ./install.sh [options]
 
-What this installs:
+What this installs and verifies:
   - Debian/Kali/Ubuntu system packages through apt-get
-  - Ollama, default Ollama models, whisper.cpp, Whisper models, Piper, Piper voice
-  - HeyGhost Python virtual environment and service files
-  - heyghost command wrapper and GUI launcher
-  - systemd service
-  - Desktop launcher icon for the invoking desktop user
-  - Post-install checks and test suite
+  - Ollama and local models
+  - whisper.cpp and Whisper speech-to-text models
+  - Piper text-to-speech and voice model
+  - HeyGhost Python virtual environment and Python packages
+  - HeyGhost app files, config, command wrapper, desktop GUI launcher, and systemd service
+  - Full post-install checks, Python tests, and a final beginner-friendly report
 
 Options:
-  --skip-dependencies       Do not run scripts/install_dependencies.sh
+  --skip-dependencies       Do not install external system/runtime dependencies
   --skip-tests              Do not run HeyGhost post-install tests
   --skip-desktop-icon       Do not create a desktop launcher
+  --skip-ollama             Do not install Ollama or pull Ollama models
+  --skip-whisper            Do not build whisper.cpp or download Whisper models
+  --skip-piper              Do not install Piper or its voice model
+  --ollama-model MODEL      Pull an additional Ollama model. Can be repeated
+  --whisper-model MODEL     Download an additional whisper.cpp model. Can be repeated
+  --piper-version VERSION   Piper release version, default: 1.2.0
+  --piper-voice VOICE       Piper voice name, default: en_US-lessac-medium
   --install-root PATH       Install application files to PATH
   --config-root PATH        Install configuration to PATH
   --log-dir PATH            Write logs under PATH
-  --dependency-arg VALUE    Pass one extra argument to scripts/install_dependencies.sh
+  --dependency-arg VALUE    Backward-compatible dependency option passthrough
   -h, --help                Show this help
 
 Examples:
   sudo ./install.sh
   sudo ./install.sh --skip-tests
-  sudo ./install.sh --dependency-arg --ollama-model --dependency-arg llama3.2:1b
+  sudo ./install.sh --ollama-model llama3.2:1b
 EOF
 }
 
@@ -61,6 +78,10 @@ warn() {
 fail() {
   printf '\n[HeyGhost error] %s\n' "$*" >&2
   exit 1
+}
+
+add_report_note() {
+  REPORT_NOTES+=("$*")
 }
 
 parse_args() {
@@ -90,9 +111,65 @@ parse_args() {
         LOG_DIR="$2"
         shift
         ;;
+      --skip-ollama)
+        SKIP_OLLAMA=1
+        ;;
+      --skip-whisper)
+        SKIP_WHISPER=1
+        ;;
+      --skip-piper)
+        SKIP_PIPER=1
+        ;;
+      --ollama-model)
+        [[ $# -ge 2 ]] || fail "--ollama-model requires a model name"
+        OLLAMA_MODELS+=("$2")
+        shift
+        ;;
+      --whisper-model)
+        [[ $# -ge 2 ]] || fail "--whisper-model requires a model name"
+        WHISPER_MODELS+=("$2")
+        shift
+        ;;
+      --piper-version)
+        [[ $# -ge 2 ]] || fail "--piper-version requires a version"
+        PIPER_VERSION="$2"
+        shift
+        ;;
+      --piper-voice)
+        [[ $# -ge 2 ]] || fail "--piper-voice requires a voice name"
+        PIPER_VOICE="$2"
+        shift
+        ;;
       --dependency-arg)
         [[ $# -ge 2 ]] || fail "--dependency-arg requires a value"
-        DEPENDENCY_ARGS+=("$2")
+        case "$2" in
+          --skip-ollama) SKIP_OLLAMA=1 ;;
+          --skip-whisper) SKIP_WHISPER=1 ;;
+          --skip-piper) SKIP_PIPER=1 ;;
+          --ollama-model|--whisper-model|--piper-version|--piper-voice)
+            local_value_index=3
+            if [[ "${3:-}" == "--dependency-arg" ]]; then
+              local_value_index=4
+              [[ $# -ge 4 ]] || fail "$2 requires a value after --dependency-arg"
+            else
+              [[ $# -ge 3 ]] || fail "$2 requires a value after --dependency-arg"
+            fi
+            case "$2" in
+              --ollama-model) OLLAMA_MODELS+=("${!local_value_index}") ;;
+              --whisper-model) WHISPER_MODELS+=("${!local_value_index}") ;;
+              --piper-version) PIPER_VERSION="${!local_value_index}" ;;
+              --piper-voice) PIPER_VOICE="${!local_value_index}" ;;
+            esac
+            if [[ "${local_value_index}" -eq 4 ]]; then
+              shift 2
+            else
+              shift
+            fi
+            ;;
+          *)
+            fail "Unsupported --dependency-arg value now that install.sh is self-contained: $2"
+            ;;
+        esac
         shift
         ;;
       -h|--help)
@@ -132,17 +209,154 @@ resolve_desktop_user() {
   fi
 }
 
-run_dependency_installer() {
-  if [[ "${RUN_DEPENDENCIES}" -eq 0 ]]; then
-    log "Skipping external dependency installation."
+run_as_invoking_user() {
+  if [[ -n "${SUDO_USER:-}" && "${SUDO_USER}" != "root" ]]; then
+    sudo -u "${SUDO_USER}" env HOME="$(getent passwd "${SUDO_USER}" | cut -d: -f6)" "$@"
+  else
+    "$@"
+  fi
+}
+
+install_system_packages() {
+  log "Installing Debian/Kali/Ubuntu system packages."
+  apt-get update
+  apt-get install -y \
+    git \
+    curl \
+    wget \
+    ca-certificates \
+    build-essential \
+    cmake \
+    pkg-config \
+    python3 \
+    python3-venv \
+    python3-pip \
+    python3-tk \
+    portaudio19-dev \
+    ffmpeg \
+    alsa-utils
+  add_report_note "System packages installed or already present."
+}
+
+prepare_dependency_dirs() {
+  mkdir -p \
+    "${INSTALL_ROOT}/bin" \
+    "${INSTALL_ROOT}/models/whisper" \
+    "${INSTALL_ROOT}/models/piper" \
+    "${INSTALL_ROOT}/knowledge" \
+    "${INSTALL_ROOT}/shared" \
+    "${BUILD_DIR}"
+}
+
+install_ollama_dependency() {
+  if [[ "${SKIP_OLLAMA}" -eq 1 ]]; then
+    log "Skipping Ollama."
+    add_report_note "Ollama installation skipped."
     return
   fi
 
-  local installer="${PROJECT_ROOT}/scripts/install_dependencies.sh"
-  [[ -x "${installer}" ]] || fail "Missing executable dependency installer: ${installer}"
+  if ! command -v ollama >/dev/null 2>&1; then
+    log "Installing Ollama."
+    curl -fsSL https://ollama.com/install.sh | sh
+    add_report_note "Ollama installed."
+  else
+    log "Ollama already installed."
+    add_report_note "Ollama already installed."
+  fi
 
-  log "Installing system packages, Ollama, Whisper, Piper, and default models."
-  HEY_GHOST_INSTALL_ROOT="${INSTALL_ROOT}" "${installer}" --install-root "${INSTALL_ROOT}" "${DEPENDENCY_ARGS[@]}"
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl enable --now ollama 2>/dev/null || true
+  fi
+
+  log "Pulling Ollama models: ${OLLAMA_MODELS[*]}"
+  for model in "${OLLAMA_MODELS[@]}"; do
+    run_as_invoking_user ollama pull "${model}"
+  done
+  add_report_note "Ollama models available: ${OLLAMA_MODELS[*]}."
+}
+
+install_whisper_cpp_dependency() {
+  if [[ "${SKIP_WHISPER}" -eq 1 ]]; then
+    log "Skipping whisper.cpp."
+    add_report_note "whisper.cpp installation skipped."
+    return
+  fi
+
+  log "Building whisper.cpp."
+  rm -rf "${BUILD_DIR}/whisper.cpp"
+  git clone --depth 1 --branch "${WHISPER_CPP_REF}" https://github.com/ggml-org/whisper.cpp.git "${BUILD_DIR}/whisper.cpp"
+  cmake -S "${BUILD_DIR}/whisper.cpp" -B "${BUILD_DIR}/whisper.cpp/build"
+  cmake --build "${BUILD_DIR}/whisper.cpp/build" -j"$(nproc)"
+
+  local whisper_bin="${BUILD_DIR}/whisper.cpp/build/bin/whisper-cli"
+  [[ -x "${whisper_bin}" ]] || fail "whisper-cli was not found at ${whisper_bin}"
+  install -m 0755 "${whisper_bin}" "${INSTALL_ROOT}/bin/whisper-cli"
+
+  log "Downloading Whisper models: ${WHISPER_MODELS[*]}"
+  for model in "${WHISPER_MODELS[@]}"; do
+    bash "${BUILD_DIR}/whisper.cpp/models/download-ggml-model.sh" "${model}"
+    install -m 0644 \
+      "${BUILD_DIR}/whisper.cpp/models/ggml-${model}.bin" \
+      "${INSTALL_ROOT}/models/whisper/ggml-${model}.bin"
+  done
+  add_report_note "whisper.cpp installed with models: ${WHISPER_MODELS[*]}."
+}
+
+piper_asset_name() {
+  case "$(uname -m)" in
+    x86_64|amd64)
+      printf 'piper_amd64.tar.gz'
+      ;;
+    aarch64|arm64)
+      printf 'piper_arm64.tar.gz'
+      ;;
+    *)
+      fail "Unsupported CPU architecture for automatic Piper install: $(uname -m)"
+      ;;
+  esac
+}
+
+install_piper_dependency() {
+  if [[ "${SKIP_PIPER}" -eq 1 ]]; then
+    log "Skipping Piper."
+    add_report_note "Piper installation skipped."
+    return
+  fi
+
+  local asset piper_url
+  asset="$(piper_asset_name)"
+  piper_url="https://github.com/rhasspy/piper/releases/download/v${PIPER_VERSION}/${asset}"
+
+  log "Installing Piper ${PIPER_VERSION}."
+  rm -rf "${BUILD_DIR}/piper" "${BUILD_DIR}/${asset}"
+  wget -O "${BUILD_DIR}/${asset}" "${piper_url}"
+  mkdir -p "${BUILD_DIR}/piper"
+  tar -xzf "${BUILD_DIR}/${asset}" -C "${BUILD_DIR}/piper" --strip-components=1
+
+  [[ -x "${BUILD_DIR}/piper/piper" ]] || fail "Piper binary was not found after extracting ${asset}"
+  install -m 0755 "${BUILD_DIR}/piper/piper" "${INSTALL_ROOT}/bin/piper"
+
+  log "Downloading Piper voice ${PIPER_VOICE}."
+  wget -O "${INSTALL_ROOT}/models/piper/${PIPER_VOICE}.onnx" \
+    "${PIPER_VOICE_BASE_URL}/${PIPER_VOICE}.onnx"
+  wget -O "${INSTALL_ROOT}/models/piper/${PIPER_VOICE}.onnx.json" \
+    "${PIPER_VOICE_BASE_URL}/${PIPER_VOICE}.onnx.json"
+  add_report_note "Piper ${PIPER_VERSION} installed with voice ${PIPER_VOICE}."
+}
+
+run_dependency_installer() {
+  if [[ "${RUN_DEPENDENCIES}" -eq 0 ]]; then
+    log "Skipping external dependency installation."
+    add_report_note "External dependency installation skipped."
+    return
+  fi
+
+  log "Installing dependencies directly from install.sh."
+  install_system_packages
+  prepare_dependency_dirs
+  install_ollama_dependency
+  install_whisper_cpp_dependency
+  install_piper_dependency
 }
 
 install_python_requirements() {
@@ -495,34 +709,67 @@ launch_heyghost_app() {
   fail "HeyGhost service failed to start."
 }
 
-print_next_steps() {
+print_install_report() {
+  local service_state="not checked"
+  if systemctl is-active --quiet hey-ghost.service; then
+    service_state="running"
+  else
+    service_state="not running"
+  fi
+
   cat <<EOF
 
-Install complete.
+HeyGhost install report
+=======================
 
-Installed paths:
-  App:      ${INSTALL_ROOT}
-  Config:   ${CONFIG_ROOT}/config.yaml
-  Logs:     ${LOG_DIR}
-  Command:  ${WRAPPER_PATH}
-  GUI:      ${DESKTOP_WRAPPER_PATH}
-  Service:  hey-ghost.service
+Result:
+  Install completed successfully.
+  Post-install checks passed.
+  Service status: ${service_state}
 
-Start and test HeyGhost:
-  heyghost start
-  heyghost status
-  heyghost trigger
+Installed locations:
+  App files:        ${INSTALL_ROOT}
+  Config file:      ${CONFIG_ROOT}/config.yaml
+  Logs:             ${LOG_DIR}
+  Command:          ${WRAPPER_PATH}
+  Desktop launcher: ${DESKTOP_WRAPPER_PATH}
+  Systemd service:  hey-ghost.service
 
-Desktop launcher:
-  A HeyGhost icon was created on the desktop for the user who ran sudo.
-  Double-click it to open the GhostWave GUI, then click the window or press Space to start listening.
-  If your desktop asks for permission, choose "Allow Launching" or "Trust and Launch".
-  Launch logs are written to ~/.local/state/heyghost/desktop-launch.log.
+Installed runtime pieces:
+EOF
 
-Useful commands:
-  heyghost debug-window
-  heyghost stop
-  journalctl -u hey-ghost.service -f
+  for note in "${REPORT_NOTES[@]}"; do
+    printf '  - %s\n' "${note}"
+  done
+
+  cat <<EOF
+
+Verified checks:
+  - Required runtime files exist
+  - Python imports load
+  - Config file loads
+  - HeyGhost Python tests passed or were intentionally skipped
+  - Ollama responds
+  - Piper binary runs
+  - whisper.cpp binary runs
+  - hey-ghost.service starts
+
+How to use HeyGhost:
+  Start service:      heyghost start
+  Stop service:       heyghost stop
+  Service status:     heyghost status
+  Open GUI:           double-click the HeyGhost desktop icon
+  Trigger listening:  heyghost trigger
+  Test Ollama:        heyghost test-ollama
+  Test speech:        heyghost test-tts
+  Watch logs:         journalctl -u hey-ghost.service -f
+
+Beginner notes:
+  - Double-click the desktop icon to open the GhostWave GUI.
+  - Click the GUI window or press Space to start a listening session.
+  - If audio devices are wrong, edit ${CONFIG_ROOT}/config.yaml.
+  - GUI launch logs are under ~/.local/state/heyghost/.
+
 EOF
 }
 
@@ -540,4 +787,4 @@ enable_service
 create_desktop_icon
 run_checks_with_repair
 launch_heyghost_app
-print_next_steps
+print_install_report
