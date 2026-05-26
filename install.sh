@@ -401,6 +401,28 @@ copy_optional() {
   fi
 }
 
+configure_runtime_defaults() {
+  log "Configuring always-listening fullscreen defaults."
+  "${INSTALL_ROOT}/venv/bin/python" - "${CONFIG_ROOT}/config.yaml" <<'HEY_GHOST_CONFIG_DEFAULTS'
+from pathlib import Path
+import sys
+import yaml
+
+path = Path(sys.argv[1])
+with path.open("r", encoding="utf-8") as handle:
+    config = yaml.safe_load(handle) or {}
+
+config.setdefault("assistant", {})["mode"] = "always_listening"
+config.setdefault("wake_word", {})["engine"] = "always_on"
+config.setdefault("wake_word", {})["session_mode"] = "always_listening"
+config.setdefault("gui", {})["fullscreen"] = True
+
+with path.open("w", encoding="utf-8") as handle:
+    yaml.safe_dump(config, handle, sort_keys=False)
+HEY_GHOST_CONFIG_DEFAULTS
+  add_report_note "Config set to always listening and fullscreen GUI by default."
+}
+
 install_files() {
   log "Installing HeyGhost application files."
   mkdir -p "${INSTALL_ROOT}" "${CONFIG_ROOT}" "${LOG_DIR}"
@@ -440,6 +462,7 @@ install_files() {
 
   python3 -m venv "${INSTALL_ROOT}/venv"
   install_python_requirements
+  configure_runtime_defaults
 
   mkdir -p \
     "${INSTALL_ROOT}/bin" \

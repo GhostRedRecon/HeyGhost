@@ -1,7 +1,7 @@
 assistant:
   name: "Ghost"
   wake_phrase: "hey ghost"
-  mode: "wake_word_session"
+  mode: "always_listening"
   follow_up_timeout_seconds: 30
   session_timeout_seconds: 30
   max_response_words: 40
@@ -76,8 +76,8 @@ audio:
   vad_aggressiveness: 3
 
 wake_word:
-  engine: "manual"
-  session_mode: "wake_word_session"
+  engine: "always_on"
+  session_mode: "always_listening"
   sensitivity: 0.5
   model_name: "hey_ghost"
   dev_trigger_file: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/shared/heyghost_wake"
@@ -126,7 +126,7 @@ rag:
 gui:
   enabled: true
   style: "ghost_wave"
-  fullscreen: false
+  fullscreen: true
   low_power_mode: true
   animation_interval_ms: 50
   background: "#030712"

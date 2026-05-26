@@ -166,21 +166,17 @@ Install HeyGhost and all default runtime dependencies with one command:
 sudo ./install.sh
 ```
 
-The installer installs system packages, Ollama, default Ollama models, whisper.cpp, Whisper models, Piper, the default Piper voice, the Python virtual environment, the `heyghost` command, the systemd service, and a desktop launcher icon. It also runs post-install checks so the user knows whether the installation is usable.
+The installer installs system packages, Ollama, default Ollama models, whisper.cpp, Whisper models, Piper, the default Piper voice, the Python virtual environment, the `heyghost` command, the systemd service, and a desktop launcher icon. It also runs post-install checks so the user knows whether the installation is usable. By default HeyGhost listens continuously, opens the GhostWave GUI fullscreen from the desktop icon, and shows the active Ollama model on the GUI.
 
 Useful installer options:
 
 ```bash
 sudo ./install.sh --skip-tests
 sudo ./install.sh --skip-desktop-icon
-sudo ./install.sh --dependency-arg --ollama-model --dependency-arg llama3.2:1b
+sudo ./install.sh --ollama-model llama3.2:1b
 ```
 
-Advanced users can run the dependency installer separately if they only want to prepare external tools:
-
-```bash
-sudo ./scripts/install_dependencies.sh
-```
+All dependency installation now lives in `install.sh`, so new users only need one installer command.
 
 Manual Ollama model installation:
 

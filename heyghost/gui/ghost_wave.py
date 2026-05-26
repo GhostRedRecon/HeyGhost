@@ -12,6 +12,7 @@ from heyghost.gui.theme import build_theme, dim_color
 
 STATE_LABELS = {
     "idle": "Idle",
+    "always_listening": "Always listening...",
     "wake_detected": "Hey Ghost heard",
     "listening": "Listening...",
     "transcribing": "Transcribing...",
@@ -36,6 +37,7 @@ class GhostWaveRenderer:
         self.bar_count = max(16, min(96, self.bar_count))
         self.state = "idle"
         self.status = STATE_LABELS["idle"]
+        self.model_label = f"Ollama: {getattr(getattr(config, 'llm', None), 'model', 'local model')}"
         self.user_text = ""
         self.assistant_text = ""
         self.audio_level = 0.0
@@ -133,12 +135,13 @@ class GhostWaveRenderer:
         self.items["micro"] = self.canvas.create_text(
             0,
             0,
-            text="local",
+            text=self.model_label,
             fill=dim_color(self.theme.colors["text_secondary"], 0.72),
-            font=(self.theme.font_family, 9),
+            font=(self.theme.font_family, 11),
             anchor="center",
         )
         self.diagnostics.build()
+        self.diagnostics.update("model", getattr(getattr(self.config, "llm", None), "model", ""))
         self.diagnostics.set_visible(getattr(self.gui_config, "diagnostics_default", False))
         self.tick()
 
@@ -169,7 +172,9 @@ class GhostWaveRenderer:
         if name == "audio_level":
             self.set_audio_level(float(event.get("level", 0.0) or 0.0))
             return
-        if name in {"idle_wake_word", "session_idle"}:
+        if name == "always_listening":
+            self.set_state("always_listening")
+        elif name in {"idle_wake_word", "session_idle"}:
             self.set_state("idle")
         elif name in {"wake_detected", "session_started"}:
             self.set_state("wake_detected")
@@ -246,7 +251,7 @@ class GhostWaveRenderer:
         spacing = wave_width / max(1, self.bar_count - 1)
         start_x = center_x - wave_width / 2
         amplitude = self._state_amplitude()
-        audio = self.audio_level if self.state in {"listening", "speaking"} else self.audio_level * 0.35
+        audio = self.audio_level if self.state in {"always_listening", "listening", "speaking"} else self.audio_level * 0.35
         smoothing = max(0.04, min(float(getattr(self.wave_config, "smoothing", 0.18)), 0.55))
         min_height = 2.0 if self.state == "idle" else 4.0
 
@@ -282,7 +287,7 @@ class GhostWaveRenderer:
         self.canvas.itemconfig(self.items["assistant"], text=f"Ghost: {self._wrap(self.assistant_text or '-', 94)}", width=text_width)
         if getattr(self.wave_config, "show_micro_status", True):
             self.canvas.coords(self.items["micro"], center_x, center_y + max_height // 2 + 72)
-            self.canvas.itemconfig(self.items["micro"], text=f"{self.state.replace('_', ' ')} | local")
+            self.canvas.itemconfig(self.items["micro"], text=f"{self.state.replace('_', ' ')} | {self.model_label}")
         else:
             self.canvas.itemconfig(self.items["micro"], text="")
         self.diagnostics.render(width, height)
@@ -341,13 +346,14 @@ class GhostWaveRenderer:
 
     def _state_amplitude(self) -> float:
         key = f"{self.state}_amplitude"
-        if self.state == "follow_up_listening":
+        if self.state in {"always_listening", "follow_up_listening"}:
             key = "listening_amplitude"
         return float(getattr(self.wave_config, key, getattr(self.wave_config, "idle_amplitude", 0.08)))
 
     def _state_speed(self) -> float:
         return {
             "idle": 0.10,
+            "always_listening": 0.26,
             "wake_detected": 0.42,
             "listening": 0.32,
             "transcribing": 0.24,
