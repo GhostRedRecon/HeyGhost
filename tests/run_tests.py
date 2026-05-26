@@ -15,6 +15,8 @@ TEST_MODULES = (
     "tests.test_linux_system",
     "tests.test_structured_llm",
     "tests.test_rag",
+    "tests.test_self_echo",
+    "tests.test_attention_gate",
 )
 
 
