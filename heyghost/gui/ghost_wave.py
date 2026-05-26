@@ -252,9 +252,8 @@ class GhostWaveRenderer:
         elif name in {"low_confidence", "no_speech"}:
             return
         elif name == "error":
-            self.set_state("error")
-            self.status = STATE_LABELS["error"]
             self.diagnostics.update("last error", text)
+            return
 
     def toggle_diagnostics(self) -> None:
         self.diagnostics.toggle()

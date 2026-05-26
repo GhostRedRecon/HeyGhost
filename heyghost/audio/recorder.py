@@ -102,7 +102,7 @@ class Recorder:
             "speech_ended": 1.0 if speech_ended else 0.0,
         }
 
-        if not heard_speech or speech_ms < self.min_speech_ms or not speech_ended:
+        if not heard_speech or speech_ms < self.min_speech_ms:
             return None
 
         fd, output_path = tempfile.mkstemp(prefix="heyghost_input_", suffix=".wav")
