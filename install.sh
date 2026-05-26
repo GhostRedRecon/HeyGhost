@@ -416,11 +416,16 @@ config.setdefault("assistant", {})["mode"] = "always_listening"
 config.setdefault("wake_word", {})["engine"] = "always_on"
 config.setdefault("wake_word", {})["session_mode"] = "always_listening"
 config.setdefault("gui", {})["fullscreen"] = True
+config.setdefault("gui", {})["diagnostics_default"] = True
+config.setdefault("audio", {})["sample_rate"] = 48000
+config.setdefault("audio", {})["vad_aggressiveness"] = 2
+config.setdefault("audio", {})["silence_timeout_ms"] = 700
+config.setdefault("audio", {})["min_speech_ms"] = 120
 
 with path.open("w", encoding="utf-8") as handle:
     yaml.safe_dump(config, handle, sort_keys=False)
 HEY_GHOST_CONFIG_DEFAULTS
-  add_report_note "Config set to always listening and fullscreen GUI by default."
+  add_report_note "Config set to always listening, fullscreen diagnostic GUI, and laptop-friendly speech detection by default."
 }
 
 install_files() {
@@ -534,6 +539,11 @@ target.parent.mkdir(parents=True, exist_ok=True)
 with target.open("w", encoding="utf-8") as handle:
     yaml.safe_dump(config, handle, sort_keys=False)
 HEY_GHOST_DESKTOP_CONFIG
+  if systemctl is-active --quiet hey-ghost.service 2>/dev/null; then
+    printf '[%s] hey-ghost.service is active; opening GUI monitor only\n' "\$(date -Is)"
+    HEY_GHOST_CONFIG="\${SOURCE_CONFIG}" exec "${WRAPPER_PATH}" debug-window
+  fi
+  printf '[%s] hey-ghost.service is not active; starting desktop assistant\n' "\$(date -Is)"
   HEY_GHOST_CONFIG="\${USER_CONFIG}" exec "${WRAPPER_PATH}" desktop
 } >> "\${LAUNCH_LOG}" 2>&1
 EOF

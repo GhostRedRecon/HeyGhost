@@ -38,7 +38,13 @@ if ! flock -n 9; then
 fi
 
 if command -v heyghost >/dev/null 2>&1; then
+  if systemctl is-active --quiet hey-ghost.service 2>/dev/null; then
+    exec heyghost debug-window >>"${LOG_FILE}" 2>&1
+  fi
   exec heyghost desktop >>"${LOG_FILE}" 2>&1
 fi
 
+if systemctl is-active --quiet hey-ghost.service 2>/dev/null; then
+  exec python3 "${PROJECT_ROOT}/heyghost.py" --config "${HEY_GHOST_CONFIG:-${PROJECT_ROOT}/config.yaml}" debug-window >>"${LOG_FILE}" 2>&1
+fi
 exec python3 "${PROJECT_ROOT}/heyghost.py" --config "${HEY_GHOST_CONFIG:-${PROJECT_ROOT}/config.yaml}" desktop >>"${LOG_FILE}" 2>&1
