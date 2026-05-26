@@ -151,6 +151,9 @@ class GhostApp:
             channels=config.audio.channels,
             device=config.audio.input_device,
         )
+        resolved_sample_rate = self.audio_input.resolve_sample_rate()
+        if resolved_sample_rate != config.audio.sample_rate:
+            config.audio.sample_rate = resolved_sample_rate
         self.audio_output = AudioOutput(device=config.audio.output_device)
         self.vad = VoiceActivityDetector(
             aggressiveness=config.audio.vad_aggressiveness,
@@ -244,8 +247,10 @@ class GhostApp:
             self.config.wake_word.engine,
             self.config.wake_word.dev_trigger_file,
         )
+        self.logger.info('Audio input sample rate resolved to %s Hz', self.config.audio.sample_rate)
         self.debug_events.reset()
         self.debug_events.emit('service_started')
+        self.debug_events.emit('audio_input_ready', sample_rate=self.config.audio.sample_rate)
 
         if self.config.wake_word.engine == 'always_on':
             self.debug_events.emit('always_listening')

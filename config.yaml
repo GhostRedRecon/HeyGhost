@@ -63,7 +63,7 @@ tts:
   sentence_silence: 0.05
 
 audio:
-  sample_rate: 16000
+  sample_rate: 48000
   channels: 1
   input_device: null
   output_device: null

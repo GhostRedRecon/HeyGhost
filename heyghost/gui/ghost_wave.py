@@ -251,6 +251,11 @@ class GhostWaveRenderer:
             self.set_metrics(event)
         elif name in {"low_confidence", "no_speech"}:
             self.set_state("uncertain")
+            if name == "no_speech":
+                self.diagnostics.update(
+                    "last error",
+                    f"no speech detected; max audio {float(event.get('max_audio_level', 0.0) or 0.0):.2f}",
+                )
         elif name == "error":
             self.set_state("error")
             self.status = text[:80] or STATE_LABELS["error"]
@@ -350,11 +355,22 @@ class GhostWaveRenderer:
             output_count = sum(1 for device in devices if int(device.get("max_output_channels", 0)) > 0)
             input_device = getattr(audio_config, "input_device", None)
             output_device = getattr(audio_config, "output_device", None)
+            sample_rate = int(getattr(audio_config, "sample_rate", 48000) or 48000)
             if input_device is not None:
                 device = sd.query_devices(input_device)
                 statuses["mic"] = "ok" if int(device.get("max_input_channels", 0)) > 0 else "bad device"
             else:
                 statuses["mic"] = "ok" if input_count else "not found"
+            if statuses["mic"] == "ok":
+                try:
+                    sd.check_input_settings(
+                        device=input_device,
+                        channels=int(getattr(audio_config, "channels", 1) or 1),
+                        dtype="int16",
+                        samplerate=sample_rate,
+                    )
+                except Exception as exc:
+                    statuses["mic"] = f"bad rate {sample_rate}: {exc}"
             if output_device is not None:
                 device = sd.query_devices(output_device)
                 statuses["speaker"] = "ok" if int(device.get("max_output_channels", 0)) > 0 else "bad device"
