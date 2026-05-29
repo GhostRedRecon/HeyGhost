@@ -39,6 +39,8 @@ The LLM output is treated as text only. It does not directly execute shell comma
 
 ## Supported Operating Systems
 
+<img width="1392" height="1038" alt="HeyGhost" src="https://github.com/user-attachments/assets/c686eb52-a87f-4c41-971b-d2c054ab06a4" />
+
 HeyGhost is designed for Linux.
 
 | Platform | Status | Notes |
