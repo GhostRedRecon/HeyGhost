@@ -222,11 +222,41 @@ CYBERSECURITY_TOPICS: dict[str, str] = {
 }
 
 
+AI_TOPICS: dict[str, str] = {
+    "artificial intelligence": "Artificial intelligence is software that performs tasks normally associated with human reasoning, such as recognizing patterns, generating text, or making predictions.",
+    "ai": "AI is software that can recognize patterns, generate content, make predictions, or assist decisions from data.",
+    "machine learning": "Machine learning is a type of AI where systems learn patterns from data instead of being programmed with every rule.",
+    "large language model": "A large language model predicts and generates text from patterns learned during training. It can be useful, but it can still make mistakes.",
+    "llm": "An LLM is a language model that predicts and generates text. Use it with verification when accuracy matters.",
+    "prompt injection": "Prompt injection is when untrusted text tries to override an AI assistant's instructions. Defend by separating data from instructions, limiting tools, and validating outputs.",
+    "model hallucination": "Model hallucination is when an AI gives an answer that sounds confident but is wrong or unsupported. Reduce it with grounding, retrieval, tests, and human review.",
+    "hallucination": "AI hallucination means a model produces incorrect or unsupported information. Ask for sources, use trusted context, and verify important answers.",
+    "local ai": "Local AI runs on your own machine instead of a cloud service. It can improve privacy and offline use, but model quality and speed depend on the hardware.",
+    "ollama": "Ollama runs local AI models through a simple local service. It is useful for private, offline, or low-cost assistant experiments.",
+    "small language model": "A small language model is faster and lighter than a large model, but it usually has less reasoning depth and knowledge.",
+    "model selection": "Model selection balances answer quality, speed, memory use, context size, and safety behavior for the hardware you have.",
+    "ai privacy": "AI privacy means limiting what sensitive data goes into models, controlling logs, and choosing local or approved systems when data should not leave the device.",
+    "local ai privacy": "Local AI can be better for privacy because prompts and files can stay on your own machine instead of being sent to a cloud provider.",
+    "ai for soc": "AI can help a SOC analyst summarize alerts, cluster related events, draft timelines, and prioritize review, but humans should validate conclusions.",
+    "soc analyst": "AI can help a SOC analyst summarize alerts, group related events, draft timelines, and prioritize review, while humans validate the evidence and decisions.",
+    "ai assisted log analysis": "AI assisted log analysis can summarize noisy events and suggest patterns, but it should be checked against raw logs before action.",
+    "ai security": "AI security protects models, prompts, training data, tools, and outputs from misuse, leakage, manipulation, and unsafe automation.",
+    "ai safety": "AI safety is the practice of making AI systems reliable, controlled, transparent, and aligned with responsible use.",
+}
+
+
 def answer_domain_question(text: str) -> tuple[str, str] | None:
     normalized = _normalize(text)
     yoga = _find_topic(normalized, YOGA_TOPICS, required_terms=("yoga", "asana", "pose", "breath", "meditation"))
     if yoga is not None:
         return ("knowledge:yoga_catalog", yoga)
+    ai = _find_topic(
+        normalized,
+        AI_TOPICS,
+        required_terms=("ai", "llm", "model", "prompt", "ollama", "hallucination"),
+    )
+    if ai is not None:
+        return ("knowledge:ai_catalog", ai)
     cyber = _find_topic(
         normalized,
         CYBERSECURITY_TOPICS,

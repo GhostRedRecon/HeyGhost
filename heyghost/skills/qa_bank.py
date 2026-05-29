@@ -4,6 +4,7 @@ import re
 
 
 CYBER_TOPICS: dict[str, str] = {
+    "cybersecurity": "Cybersecurity is the practice of protecting computers, networks, accounts, and data from unauthorized access, misuse, or damage.",
     "phishing": "Phishing is a trick that uses fake messages or sites to steal information. Verify senders, avoid surprise links, and use MFA.",
     "ransomware": "Ransomware locks or steals data for payment. Defend with tested backups, patching, MFA, and least privilege.",
     "spyware": "Spyware secretly monitors activity or steals data. Avoid untrusted downloads, review permissions, and keep systems updated.",
@@ -33,6 +34,7 @@ CYBER_TOPICS: dict[str, str] = {
 
 
 LINUX_TOPICS: dict[str, str] = {
+    "linux": "Linux is a free, open-source operating system family built around the Linux kernel. It powers servers, desktops, phones, embedded devices, and many security tools because it is stable, flexible, and highly configurable.",
     "kernel": "The Linux kernel manages hardware, processes, memory, filesystems, drivers, and networking.",
     "shell": "A shell is a command interface. Bash and zsh let users run commands, scripts, and pipelines.",
     "terminal": "A terminal is a text interface to the shell. HeyGhost can open a whitelisted terminal window.",
@@ -105,7 +107,11 @@ def _topic_matches(text: str, topic: str) -> bool:
     padded = f" {text} "
     if f" {topic} " in padded:
         return True
-    words = [word for word in topic.split() if len(word) >= 4]
+    topic_words = topic.split()
+    if len(topic_words) > 1:
+        words = [word for word in topic_words if len(word) >= 3]
+        return bool(words) and all(f" {word} " in padded for word in words)
+    words = [word for word in topic_words if len(word) >= 4]
     return bool(words) and all(f" {word} " in padded for word in words)
 
 

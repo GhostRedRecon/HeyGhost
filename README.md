@@ -200,6 +200,7 @@ Start HeyGhost:
 ```bash
 heyghost start
 heyghost status
+heyghost doctor
 ```
 
 Trigger a manual listening session:
@@ -212,6 +213,12 @@ Open the debug UI:
 
 ```bash
 heyghost debug-window
+```
+
+Run a local install diagnostic:
+
+```bash
+heyghost doctor
 ```
 
 ## How To Use HeyGhost
@@ -368,14 +375,25 @@ sudo HEY_GHOST_INSTALL_ROOT=/srv/heyghost ./install.sh
 
 ## Audio Setup
 
-The default config uses `null` devices so PortAudio can use system defaults. If your microphone or speaker is not selected correctly, list devices:
+Linux audio hardware varies a lot between laptops, mini PCs, USB microphones, HDMI audio, Bluetooth devices, PipeWire, PulseAudio, and plain ALSA setups. HeyGhost ships with `null` audio devices by default so PortAudio can use the system defaults, but some devices need extra microphone or speaker configuration before voice input and TTS playback work correctly.
+
+Start with the built-in diagnostic:
+
+```bash
+heyghost doctor
+```
+
+If `audio input` or `audio output` fails, inspect the devices visible to Linux:
 
 ```bash
 python3 -m sounddevice
+arecord -l
+arecord -L
 aplay -l
+aplay -L
 ```
 
-Then edit `/etc/hey-ghost/config.yaml` or your local `config.yaml`:
+Then edit `/etc/hey-ghost/config.yaml` for an installed service, or edit your local `config.yaml` when running from a clone:
 
 ```yaml
 audio:
@@ -383,7 +401,42 @@ audio:
   output_device: null
 ```
 
-Use explicit device IDs only when needed.
+For PortAudio devices, use the numeric device ID shown by `python3 -m sounddevice`:
+
+```yaml
+audio:
+  input_device: 3
+  output_device: 5
+```
+
+For ALSA devices, use the ALSA name shown by `arecord -L` or `aplay -L`:
+
+```yaml
+audio:
+  input_device: "plughw:CARD=sofhdadsp,DEV=6"
+  output_device: "plughw:CARD=sofhdadsp,DEV=31"
+```
+
+Common symptoms and fixes:
+
+| Symptom | What To Check |
+| --- | --- |
+| HeyGhost hears nothing | Confirm the mic is not muted, run `arecord -l`, then set `audio.input_device`. |
+| TTS creates text but no sound plays | Run `heyghost test-tts`, check `aplay -L`, then set `audio.output_device`. |
+| `heyghost doctor` says the mic is busy | Stop the service with `heyghost stop`, test the device, then start it again. |
+| Built-in laptop mic fails but USB mic works | Use the USB mic device ID or ALSA name explicitly. |
+| HDMI or Bluetooth becomes the default speaker | Set the speaker device explicitly instead of relying on `null`. |
+| Speech is clipped or missed | Increase `audio.max_record_seconds` or `audio.silence_timeout_ms`. |
+| Background noise triggers false speech | Increase `audio.vad_aggressiveness` or use a quieter microphone. |
+
+After changing audio settings, restart the service:
+
+```bash
+heyghost restart
+heyghost doctor
+```
+
+If you are preparing a public release or installing HeyGhost on a new machine, do not assume the laptop-specific values from another computer will work. Keep `config.example.yaml` generic, then document any working hardware-specific values in your own deployment notes.
 
 ## CLI Commands
 

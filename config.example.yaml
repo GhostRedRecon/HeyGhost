@@ -4,15 +4,15 @@ assistant:
   mode: "always_listening"
   follow_up_timeout_seconds: 30
   session_timeout_seconds: 30
-  max_response_words: 40
+  max_response_words: 50
   acknowledgement: "Yes?"
 
 llm:
   provider: "ollama"
   model: "qwen2.5:0.5b"
   url: "${HEY_GHOST_OLLAMA_URL:-http://localhost:11434/api/generate}"
-  num_ctx: 512
-  num_predict: 48
+  num_ctx: 1024
+  num_predict: 64
   temperature: 0.2
   keep_alive: "15m"
 
@@ -39,7 +39,7 @@ stt:
     - "thanks for watching"
     - "see you in the next video"
     - "visit our website"
-  prompt: "This is a short spoken command to a local voice assistant named Ghost. Common requests include: what time is it, how much RAM does the system have, CPU info, operating system info, which model are you running, what are your capabilities, show your LLM capabilities, system status, disk space, yoga questions, cybersecurity questions, open browser, and open a website like google.com or youtube.com."
+  prompt: "This is a short spoken question or command to a local voice assistant named Ghost. Common requests include: what is one plus one, what is artificial intelligence, what time is it, how much RAM does the system have, CPU info, operating system info, which model are you running, what are your capabilities, show your LLM capabilities, system status, disk space, yoga questions, cybersecurity questions, open browser, and open a website like google.com or youtube.com."
   profiles:
     fast:
       model_path: "${HEY_GHOST_INSTALL_ROOT:-/opt/hey-ghost}/models/whisper/ggml-tiny.en.bin"

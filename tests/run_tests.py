@@ -10,6 +10,7 @@ TEST_MODULES = (
     "tests.test_transcript_filter",
     "tests.test_command_grammar",
     "tests.test_router",
+    "tests.test_arithmetic_skill",
     "tests.test_domain_catalog",
     "tests.test_response_policy",
     "tests.test_linux_system",
@@ -17,6 +18,8 @@ TEST_MODULES = (
     "tests.test_rag",
     "tests.test_self_echo",
     "tests.test_attention_gate",
+    "tests.test_cli",
+    "tests.test_conversation_prompt",
 )
 
 

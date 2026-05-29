@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import os
 from pathlib import Path
 
 from heyghost.stt.types import Transcript
@@ -71,7 +72,14 @@ class WhisperCppSTT:
             command.append("-nf")
         if self.prompt:
             command.extend(["--prompt", self.prompt])
-        subprocess.run(command, check=True, capture_output=True, text=True)
+        env = os.environ.copy()
+        install_lib_dir = Path(self.binary_path).resolve().parents[1] / "lib"
+        if install_lib_dir.exists():
+            current = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = (
+                f"{install_lib_dir}:{current}" if current else str(install_lib_dir)
+            )
+        subprocess.run(command, check=True, capture_output=True, text=True, env=env)
 
         txt_path = output_path.with_suffix(".txt")
         if not txt_path.exists():

@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class AudioOutput:
-    def __init__(self, device: int | None = None) -> None:
+    def __init__(self, device: int | str | None = None) -> None:
         self.device = device
 
     def play_wav(self, wav_path: str) -> float:
@@ -58,10 +58,12 @@ class AudioOutput:
         ]
         result = []
         for candidate in candidates:
-            if (
-                candidate
-                and candidate not in result
-                and Path(candidate, "pipewire-0").exists()
-            ):
+            if not candidate or candidate in result:
+                continue
+            try:
+                has_pipewire = Path(candidate, "pipewire-0").exists()
+            except OSError:
+                continue
+            if has_pipewire:
                 result.append(candidate)
         return result

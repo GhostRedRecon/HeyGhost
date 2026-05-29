@@ -13,7 +13,7 @@ from heyghost.rag.vector_store import SQLiteVectorStore
 from heyghost.skills.command_grammar import canonicalize_command
 from heyghost.skills.result import SkillResult
 
-from . import app_launcher, device_info, domain_catalog, linux_system, qa_bank, system_status, time_skill
+from . import app_launcher, arithmetic, device_info, domain_catalog, linux_system, qa_bank, system_status, time_skill
 
 
 def _result(
@@ -148,6 +148,11 @@ class SkillRegistry:
                 'capabilities',
                 'I can answer system questions and run terminal demos.',
             )
+
+        arithmetic_response = arithmetic.maybe_answer_arithmetic(text)
+        if arithmetic_response is not None:
+            name, answer = arithmetic_response
+            return _result(name, answer)
 
         capability_response = self._maybe_handle_llm_capability(normalized, text)
         if capability_response is not None:

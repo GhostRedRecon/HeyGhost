@@ -28,18 +28,21 @@ class OllamaClient:
         text = "".join(self.generate_stream(system_prompt, user_text, memory_text))
         return self._truncate_words(text.strip())
 
+    def build_prompt(self, system_prompt: str, user_text: str, memory_text: str) -> str:
+        return (
+            f"{system_prompt}\n\n"
+            f"Recent conversation:\n{memory_text or '(none)'}\n\n"
+            f"User: {user_text}\n"
+            "Assistant:"
+        )
+
     def generate_stream(
         self,
         system_prompt: str,
         user_text: str,
         memory_text: str,
     ) -> Iterator[str]:
-        prompt = (
-            f"{system_prompt}\n\n"
-            f"Recent conversation:\n{memory_text or '(none)'}\n\n"
-            f"User: {user_text}\n"
-            "Ghost:"
-        )
+        prompt = self.build_prompt(system_prompt, user_text, memory_text)
         payload = {
             "model": self.model,
             "prompt": prompt,
@@ -71,4 +74,12 @@ class OllamaClient:
         words = text.split()
         if len(words) <= self.max_response_words:
             return text
-        return " ".join(words[: self.max_response_words]).rstrip(" ,.;:") + "."
+        shortened = " ".join(words[: self.max_response_words]).rstrip()
+        sentence_end = max(
+            shortened.rfind("."),
+            shortened.rfind("?"),
+            shortened.rfind("!"),
+        )
+        if sentence_end >= max(20, len(shortened) // 2):
+            return shortened[: sentence_end + 1]
+        return shortened.rstrip(" ,.;:") + "."

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import os
 import signal
 import subprocess
@@ -8,8 +9,11 @@ import sys
 import threading
 import time
 import uuid
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
+from urllib.parse import urlsplit, urlunsplit
+from urllib.request import urlopen
 
 from heyghost.logger import configure_logging
 from heyghost.response_policy import guard_llm_response
@@ -22,26 +26,34 @@ if TYPE_CHECKING:
 
 
 SYSTEM_PROMPT = (
-    'You are Ghost, a fast local voice assistant running on a small Intel N100 '
-    'Linux device. Speak naturally, warmly, and briefly. Usually answer in one or two short '
-    'sentences. Do not use lists, bullets, or numbered answers unless the user asks. '
+    'You are HeyGhost, a practical local voice assistant. The user may call you '
+    'Ghost, but that is only your spoken assistant name; do not roleplay as a ghost, '
+    'spirit, character, or supernatural being. '
+    'Sound human, direct, and useful: answer the actual question first, then add one '
+    'short helpful detail when it improves the answer. Usually use one or two short '
+    'sentences, with a maximum of three for harder questions. Do not use Markdown, '
+    'bold text, lists, bullets, or numbered answers unless the user explicitly asks. '
+    'For advice questions, give the best first step instead of listing many steps. '
+    'If a question is broad, give a useful starter answer instead of saying you cannot '
+    'help. If the user asks for more depth, explain step by step. Ask at most one '
+    'clarifying question, and only when answering would otherwise be guesswork. '
     'Reply in the same language the user uses. You can respond in English, Spanish, '
     'or Chinese. If the user mixes languages, use the language that is clearest from '
-    'the request. You can discuss robotics, yoga, cybersecurity, general health, and '
-    'fitness at a practical educational level. For health and fitness, give general '
-    'wellness information, avoid diagnosis, and recommend professional medical help '
-    'for urgent, severe, or personal medical concerns. For cybersecurity, stay defensive '
-    'and educational; do not provide instructions for theft, malware, credential abuse, '
-    'or unauthorized access. '
-    'Use persistent memory when it is relevant, but do not mention memory mechanics. '
-    'Do not give long explanations unless the user asks. If the user asks '
-    'a question, answer it directly instead of asking for permission. If the '
-    'transcript looks incomplete or garbled, say that you did not catch it and ask '
-    'for the request again. Answer safe '
-    'read-only questions directly and never ask for confirmation for local '
+    'the request. '
+    'Use recent conversation and persistent memory when relevant, but do not mention '
+    'memory mechanics. For follow-up questions, connect your answer to the previous '
+    'turn naturally. If the transcript looks incomplete or garbled, say that you did '
+    'not catch it and ask for the request again. '
+    'You can discuss robotics, yoga, cybersecurity, general health, and fitness at a '
+    'practical educational level. For health and fitness, give general wellness '
+    'information, avoid diagnosis, and recommend professional medical help for urgent, '
+    'severe, or personal medical concerns. For cybersecurity, stay defensive and '
+    'educational; do not provide instructions for theft, malware, credential abuse, '
+    'evasion, persistence, phishing, or unauthorized access. '
+    'Answer safe read-only questions directly and never ask for confirmation for local '
     'information requests. Safe whitelisted actions such as opening the browser or a '
-    'website should be executed directly when available. Never invent command '
-    'results. Only ask for confirmation for risky or destructive actions.'
+    'website should be executed directly when available. Never invent command results. '
+    'Only ask for confirmation for risky or destructive actions.'
 )
 
 YOGA_SYSTEM_PROMPT = (
@@ -119,6 +131,12 @@ CYBERSECURITY_TERMS = (
 )
 
 SERVICE_NAME = 'hey-ghost.service'
+
+warnings.filterwarnings(
+    'ignore',
+    message='pkg_resources is deprecated as an API.*',
+    category=UserWarning,
+)
 
 
 class GhostApp:
@@ -614,10 +632,12 @@ class GhostApp:
 
     def _looks_like_garbled_transcript(self, text: str) -> bool:
         words = text.lower().split()
-        if len(words) <= 3:
-            return True
         question_starts = {'what', 'why', 'how', 'who', 'when', 'where', 'can', 'could', 'is', 'are', 'do'}
         command_starts = {'open', 'close', 'run', 'start', 'stop', 'tell', 'show', 'remember', 'forget'}
+        if len(words) >= 3 and words[0] in question_starts | command_starts:
+            return False
+        if len(words) <= 3:
+            return True
         if words[0] not in question_starts | command_starts and len(words) < 6:
             return True
         filler_count = sum(1 for word in words if word in {'the', 'of', 'to', 'for', 'and', 'a'})
@@ -677,9 +697,17 @@ class GhostApp:
             'time', 'date', 'memory', 'ram', 'cpu', 'disk', 'space', 'system', 'status',
             'model', 'capabilities', 'ability', 'linux', 'usb', 'ip', 'address', 'browser',
             'terminal', 'cybersecurity', 'cyber', 'security', 'vpn', 'phishing', 'spyware',
-            'yoga', 'robotics',
+            'yoga', 'robotics', 'math', 'calculate', 'plus', 'minus', 'times', 'divided',
+            'capital', 'science', 'history', 'ai', 'artificial', 'intelligence',
         }
-        return any(word in assistant_terms for word in words[1:])
+        if any(word in assistant_terms for word in words[1:]):
+            return True
+        normalized_raw = text.lower()
+        if any(char.isdigit() for char in normalized_raw) and any(
+            term in normalized_raw for term in ('+', '-', '*', '/', 'plus', 'minus', 'times', 'divided')
+        ):
+            return True
+        return len(words) >= 4 and normalized.startswith(('what is ', 'why is ', 'how does ', 'who is '))
 
     def _mark_conversation_active(self) -> None:
         timeout = max(3, int(self.config.assistant.follow_up_timeout_seconds))
@@ -831,6 +859,171 @@ def _status_systemctl() -> int:
     return 1
 
 
+def _ollama_tags_url(generate_url: str) -> str:
+    parts = urlsplit(generate_url)
+    path = parts.path
+    if path.endswith('/api/generate'):
+        path = path[: -len('/api/generate')] + '/api/tags'
+    elif path.endswith('/generate'):
+        path = path[: -len('/generate')] + '/tags'
+    else:
+        path = '/api/tags'
+    return urlunsplit((parts.scheme, parts.netloc, path, '', ''))
+
+
+def _doctor(config: AppConfig) -> int:
+    checks: list[tuple[str, bool, str]] = []
+
+    def check(name: str, ok: bool, detail: str = '') -> None:
+        checks.append((name, ok, detail))
+
+    check('config', True, config.source_path)
+
+    for module_name in ('yaml', 'numpy', 'sounddevice', 'webrtcvad', 'tkinter'):
+        try:
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    'ignore',
+                    message='pkg_resources is deprecated as an API.*',
+                    category=UserWarning,
+                )
+                importlib.import_module(module_name)
+        except Exception as exc:
+            check(f'import {module_name}', False, str(exc))
+        else:
+            check(f'import {module_name}', True)
+
+    required_files = (
+        ('whisper binary', config.stt.binary_path),
+        ('whisper model', config.stt.model_path),
+        ('piper binary', config.tts.binary_path),
+        ('piper model', config.tts.model_path),
+    )
+    for label, path in required_files:
+        item = Path(path)
+        check(label, item.exists(), str(item))
+
+    runtime_env = os.environ.copy()
+    install_lib_dir = Path(config.stt.binary_path).resolve().parents[1] / 'lib'
+    if install_lib_dir.exists():
+        current = runtime_env.get('LD_LIBRARY_PATH', '')
+        runtime_env['LD_LIBRARY_PATH'] = (
+            f'{install_lib_dir}:{current}' if current else str(install_lib_dir)
+        )
+
+    for label, command in (
+        ('whisper runnable', [config.stt.binary_path, '--help']),
+        ('piper runnable', [config.tts.binary_path, '--help']),
+    ):
+        try:
+            result = subprocess.run(
+                command,
+                check=False,
+                capture_output=True,
+                text=True,
+                env=runtime_env,
+            )
+        except Exception as exc:
+            check(label, False, str(exc))
+        else:
+            detail = (result.stderr or result.stdout).strip().splitlines()
+            check(label, result.returncode == 0, detail[0] if detail else '')
+
+    try:
+        with urlopen(_ollama_tags_url(config.llm.url), timeout=2.0) as response:
+            check('ollama', response.status == 200, _ollama_tags_url(config.llm.url))
+    except Exception as exc:
+        check('ollama', False, str(exc))
+
+    try:
+        from heyghost.audio.input import AudioInput
+
+        resolved_rate = AudioInput(
+            sample_rate=config.audio.sample_rate,
+            channels=config.audio.channels,
+            device=config.audio.input_device,
+        ).resolve_sample_rate()
+        check('audio input', True, f'device={config.audio.input_device} rate={resolved_rate}')
+    except Exception as exc:
+        if _audio_input_held_by_service(config.audio.input_device):
+            check('audio input', True, f'device={config.audio.input_device} in use by service')
+        else:
+            check('audio input', False, str(exc))
+
+    try:
+        if config.audio.output_device is None:
+            check('audio output', True, 'default output device')
+        elif isinstance(config.audio.output_device, str):
+            result = subprocess.run(
+                ['aplay', '-L'],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            check(
+                'audio output',
+                result.returncode == 0 and config.audio.output_device in result.stdout,
+                f'device={config.audio.output_device}',
+            )
+        else:
+            import sounddevice as sd
+
+            sd.check_output_settings(device=config.audio.output_device)
+            check('audio output', True, f'device={config.audio.output_device}')
+    except Exception as exc:
+        check('audio output', False, str(exc))
+
+    try:
+        result = subprocess.run(
+            ['systemctl', 'is-active', SERVICE_NAME],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        check('service', False, 'systemctl not found')
+    else:
+        state = result.stdout.strip() or result.stderr.strip()
+        check('service', result.returncode == 0, state or 'unknown')
+
+    width = max(len(name) for name, _, _ in checks)
+    failed = False
+    for name, ok, detail in checks:
+        status = 'PASS' if ok else 'FAIL'
+        if not ok:
+            failed = True
+        suffix = f' - {detail}' if detail else ''
+        print(f'{status} {name:<{width}}{suffix}')
+
+    return 1 if failed else 0
+
+
+def _audio_input_held_by_service(device: int | str | None) -> bool:
+    if not isinstance(device, str):
+        return False
+    try:
+        active = subprocess.run(
+            ['systemctl', 'is-active', SERVICE_NAME],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        processes = subprocess.run(
+            ['ps', '-eo', 'args='],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except Exception:
+        return False
+    if active.returncode != 0 or processes.returncode != 0:
+        return False
+    return any(
+        'arecord' in line and f'-D {device}' in line
+        for line in processes.stdout.splitlines()
+    )
+
+
 def prepare_desktop_config(config: AppConfig) -> AppConfig:
     state_root = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local' / 'state')) / 'heyghost'
     data_root = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local' / 'share')) / 'heyghost'
@@ -903,6 +1096,7 @@ def build_parser() -> argparse.ArgumentParser:
     replay_parser.add_argument('fixture', help='JSONL fixture path')
     sub.add_parser('test-tts', help='Synthesize and play a test phrase')
     sub.add_parser('test-ollama', help='Send a hello prompt to the configured Ollama model')
+    sub.add_parser('doctor', help='Run local install and runtime diagnostics')
     sub.add_parser('index-rag', help='Index local knowledge documents for RAG search')
     sub.add_parser('debug-window', help='Open the desktop debug console')
     sub.add_parser('desktop', help='Run assistant and desktop window together')
@@ -980,6 +1174,9 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         return 0
+
+    if args.command == 'doctor':
+        return _doctor(config)
 
     if args.command == 'index-rag':
         from heyghost.rag.embeddings import OllamaEmbedder

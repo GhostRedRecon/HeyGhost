@@ -42,6 +42,24 @@ def test_attention_allows_clear_direct_assistant_request() -> None:
     assert app._has_attention("how much memory do i have", continuous=True)
 
 
+def test_attention_allows_short_arithmetic_question() -> None:
+    app = _app()
+
+    assert app._has_attention("what is 1 plus 1", continuous=True)
+
+
+def test_attention_allows_general_knowledge_question() -> None:
+    app = _app()
+
+    assert app._has_attention("what is artificial intelligence", continuous=True)
+
+
+def test_short_direct_question_is_not_marked_garbled() -> None:
+    app = _app()
+
+    assert not app._looks_like_garbled_transcript("What is Linux?")
+
+
 def test_attention_rejects_background_statement() -> None:
     app = _app()
 

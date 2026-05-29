@@ -29,6 +29,7 @@ class Recorder:
         on_speech_started: Callable[[], None] | None = None,
         on_speech_ended: Callable[[], None] | None = None,
         on_audio_level: Callable[[float], None] | None = None,
+        min_voice_level: float = 0.12,
     ) -> None:
         self.audio_input = audio_input
         self.vad = vad
@@ -45,6 +46,7 @@ class Recorder:
         self.on_speech_started = on_speech_started
         self.on_speech_ended = on_speech_ended
         self.on_audio_level = on_audio_level
+        self.min_voice_level = min_voice_level
         self.last_timing: dict[str, float] = {}
         self._last_audio_level_emit = 0.0
 
@@ -68,7 +70,7 @@ class Recorder:
                 audio_level = self._audio_level(frame)
                 max_audio_level = max(max_audio_level, audio_level)
                 self._emit_audio_level(audio_level)
-                speech = self.vad.is_speech(frame, self.sample_rate)
+                speech = audio_level >= self.min_voice_level and self.vad.is_speech(frame, self.sample_rate)
                 if speech:
                     if not heard_speech and preroll_buffer:
                         speech_frames.extend(preroll_buffer)

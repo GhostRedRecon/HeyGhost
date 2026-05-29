@@ -241,6 +241,7 @@ install_system_packages() {
 prepare_dependency_dirs() {
   mkdir -p \
     "${INSTALL_ROOT}/bin" \
+    "${INSTALL_ROOT}/lib" \
     "${INSTALL_ROOT}/models/whisper" \
     "${INSTALL_ROOT}/models/piper" \
     "${INSTALL_ROOT}/knowledge" \
@@ -291,6 +292,13 @@ install_whisper_cpp_dependency() {
   local whisper_bin="${BUILD_DIR}/whisper.cpp/build/bin/whisper-cli"
   [[ -x "${whisper_bin}" ]] || fail "whisper-cli was not found at ${whisper_bin}"
   install -m 0755 "${whisper_bin}" "${INSTALL_ROOT}/bin/whisper-cli"
+  mkdir -p "${INSTALL_ROOT}/lib"
+  find \
+    "${BUILD_DIR}/whisper.cpp/build/src" \
+    "${BUILD_DIR}/whisper.cpp/build/ggml/src" \
+    -maxdepth 1 \
+    \( -name 'libwhisper.so*' -o -name 'libggml*.so*' \) \
+    -exec cp -a {} "${INSTALL_ROOT}/lib/" \;
 
   log "Downloading Whisper models: ${WHISPER_MODELS[*]}"
   for model in "${WHISPER_MODELS[@]}"; do
@@ -334,7 +342,16 @@ install_piper_dependency() {
   tar -xzf "${BUILD_DIR}/${asset}" -C "${BUILD_DIR}/piper" --strip-components=1
 
   [[ -x "${BUILD_DIR}/piper/piper" ]] || fail "Piper binary was not found after extracting ${asset}"
-  install -m 0755 "${BUILD_DIR}/piper/piper" "${INSTALL_ROOT}/bin/piper"
+  rm -rf "${INSTALL_ROOT}/piper"
+  cp -a "${BUILD_DIR}/piper" "${INSTALL_ROOT}/piper"
+  cat > "${INSTALL_ROOT}/bin/piper" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+PIPER_DIR="${INSTALL_ROOT}/piper"
+export LD_LIBRARY_PATH="\${PIPER_DIR}:\${LD_LIBRARY_PATH:-}"
+exec "\${PIPER_DIR}/piper" "\$@"
+EOF
+  chmod 0755 "${INSTALL_ROOT}/bin/piper"
 
   log "Downloading Piper voice ${PIPER_VOICE}."
   wget -O "${INSTALL_ROOT}/models/piper/${PIPER_VOICE}.onnx" \
@@ -413,6 +430,9 @@ with path.open("r", encoding="utf-8") as handle:
     config = yaml.safe_load(handle) or {}
 
 config.setdefault("assistant", {})["mode"] = "always_listening"
+config.setdefault("assistant", {})["max_response_words"] = 50
+config.setdefault("llm", {})["num_ctx"] = 1024
+config.setdefault("llm", {})["num_predict"] = 64
 config.setdefault("wake_word", {})["engine"] = "always_on"
 config.setdefault("wake_word", {})["session_mode"] = "always_listening"
 config.setdefault("gui", {})["fullscreen"] = True
@@ -471,6 +491,7 @@ install_files() {
 
   mkdir -p \
     "${INSTALL_ROOT}/bin" \
+    "${INSTALL_ROOT}/lib" \
     "${INSTALL_ROOT}/models/whisper" \
     "${INSTALL_ROOT}/models/piper" \
     "${INSTALL_ROOT}/knowledge" \
@@ -658,7 +679,8 @@ verify_dependency_files() {
 
 verify_python_imports() {
   log "Checking Python runtime imports."
-  PYTHONPATH="${INSTALL_ROOT}" "${INSTALL_ROOT}/venv/bin/python" - <<'HEY_GHOST_PY' || return 1
+  PYTHONWARNINGS="ignore:pkg_resources is deprecated as an API:UserWarning" \
+    PYTHONPATH="${INSTALL_ROOT}" "${INSTALL_ROOT}/venv/bin/python" - <<'HEY_GHOST_PY' || return 1
 import importlib
 
 modules = (

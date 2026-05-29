@@ -1,0 +1,1068 @@
+HeyGhost Cybersecurity And AI Questions
+
+Scope:
+This document lists 1000 example questions HeyGhost should be able to answer or safely route around cybersecurity and artificial intelligence topics.
+The intended scope is defensive security, education, authorized administration, safe troubleshooting, AI literacy, responsible AI use, and production-quality voice assistant behavior.
+HeyGhost should avoid helping with credential theft, malware creation, evasion, unauthorized access, exploitation of real targets, privacy invasion, or other harmful activity. For risky requests, it should redirect to safe, defensive guidance.
+
+Questions:
+
+Cybersecurity Foundations
+
+1. Can you explain cybersecurity?
+2. Why should someone learn about cybersecurity?
+3. How does cybersecurity work at a high level?
+4. What should a beginner know about cybersecurity?
+5. What are defensive, responsible, or practical best practices for cybersecurity?
+6. Can you explain information security?
+7. Why should someone learn about information security?
+8. How does information security work at a high level?
+9. What should a beginner know about information security?
+10. What are defensive, responsible, or practical best practices for information security?
+11. Can you explain confidentiality integrity and availability?
+12. Why should someone learn about confidentiality integrity and availability?
+13. How does confidentiality integrity and availability work at a high level?
+14. What should a beginner know about confidentiality integrity and availability?
+15. What are defensive, responsible, or practical best practices for confidentiality integrity and availability?
+16. Can you explain risk management?
+17. Why should someone learn about risk management?
+18. How does risk management work at a high level?
+19. What should a beginner know about risk management?
+20. What are defensive, responsible, or practical best practices for risk management?
+21. Can you explain cyber threats?
+22. Why should someone learn about cyber threats?
+23. How does cyber threats work at a high level?
+24. What should a beginner know about cyber threats?
+25. What are defensive, responsible, or practical best practices for cyber threats?
+26. Can you explain vulnerability management?
+27. Why should someone learn about vulnerability management?
+28. How does vulnerability management work at a high level?
+29. What should a beginner know about vulnerability management?
+30. What are defensive, responsible, or practical best practices for vulnerability management?
+31. Can you explain attack surface reduction?
+32. Why should someone learn about attack surface reduction?
+33. How does attack surface reduction work at a high level?
+34. What should a beginner know about attack surface reduction?
+35. What are defensive, responsible, or practical best practices for attack surface reduction?
+36. Can you explain security controls?
+37. Why should someone learn about security controls?
+38. How does security controls work at a high level?
+39. What should a beginner know about security controls?
+40. What are defensive, responsible, or practical best practices for security controls?
+41. Can you explain defense in depth?
+42. Why should someone learn about defense in depth?
+43. How does defense in depth work at a high level?
+44. What should a beginner know about defense in depth?
+45. What are defensive, responsible, or practical best practices for defense in depth?
+46. Can you explain security awareness?
+47. Why should someone learn about security awareness?
+48. How does security awareness work at a high level?
+49. What should a beginner know about security awareness?
+50. What are defensive, responsible, or practical best practices for security awareness?
+
+Identity And Access Security
+
+51. Can you explain authentication?
+52. Why should someone learn about authentication?
+53. How does authentication work at a high level?
+54. What should a beginner know about authentication?
+55. What are defensive, responsible, or practical best practices for authentication?
+56. Can you explain authorization?
+57. Why should someone learn about authorization?
+58. How does authorization work at a high level?
+59. What should a beginner know about authorization?
+60. What are defensive, responsible, or practical best practices for authorization?
+61. Can you explain multi factor authentication?
+62. Why should someone learn about multi factor authentication?
+63. How does multi factor authentication work at a high level?
+64. What should a beginner know about multi factor authentication?
+65. What are defensive, responsible, or practical best practices for multi factor authentication?
+66. Can you explain password security?
+67. Why should someone learn about password security?
+68. How does password security work at a high level?
+69. What should a beginner know about password security?
+70. What are defensive, responsible, or practical best practices for password security?
+71. Can you explain password managers?
+72. Why should someone learn about password managers?
+73. How does password managers work at a high level?
+74. What should a beginner know about password managers?
+75. What are defensive, responsible, or practical best practices for password managers?
+76. Can you explain passkey authentication?
+77. Why should someone learn about passkey authentication?
+78. How does passkey authentication work at a high level?
+79. What should a beginner know about passkey authentication?
+80. What are defensive, responsible, or practical best practices for passkey authentication?
+81. Can you explain least privilege access?
+82. Why should someone learn about least privilege access?
+83. How does least privilege access work at a high level?
+84. What should a beginner know about least privilege access?
+85. What are defensive, responsible, or practical best practices for least privilege access?
+86. Can you explain role based access control?
+87. Why should someone learn about role based access control?
+88. How does role based access control work at a high level?
+89. What should a beginner know about role based access control?
+90. What are defensive, responsible, or practical best practices for role based access control?
+91. Can you explain single sign on?
+92. Why should someone learn about single sign on?
+93. How does single sign on work at a high level?
+94. What should a beginner know about single sign on?
+95. What are defensive, responsible, or practical best practices for single sign on?
+96. Can you explain identity governance?
+97. Why should someone learn about identity governance?
+98. How does identity governance work at a high level?
+99. What should a beginner know about identity governance?
+100. What are defensive, responsible, or practical best practices for identity governance?
+
+Network Security
+
+101. Can you explain network segmentation?
+102. Why should someone learn about network segmentation?
+103. How does network segmentation work at a high level?
+104. What should a beginner know about network segmentation?
+105. What are defensive, responsible, or practical best practices for network segmentation?
+106. Can you explain firewalls?
+107. Why should someone learn about firewalls?
+108. How does firewalls work at a high level?
+109. What should a beginner know about firewalls?
+110. What are defensive, responsible, or practical best practices for firewalls?
+111. Can you explain virtual private networks?
+112. Why should someone learn about virtual private networks?
+113. How does virtual private networks work at a high level?
+114. What should a beginner know about virtual private networks?
+115. What are defensive, responsible, or practical best practices for virtual private networks?
+116. Can you explain secure DNS?
+117. Why should someone learn about secure DNS?
+118. How does secure DNS work at a high level?
+119. What should a beginner know about secure DNS?
+120. What are defensive, responsible, or practical best practices for secure DNS?
+121. Can you explain wireless network security?
+122. Why should someone learn about wireless network security?
+123. How does wireless network security work at a high level?
+124. What should a beginner know about wireless network security?
+125. What are defensive, responsible, or practical best practices for wireless network security?
+126. Can you explain zero trust networking?
+127. Why should someone learn about zero trust networking?
+128. How does zero trust networking work at a high level?
+129. What should a beginner know about zero trust networking?
+130. What are defensive, responsible, or practical best practices for zero trust networking?
+131. Can you explain intrusion detection?
+132. Why should someone learn about intrusion detection?
+133. How does intrusion detection work at a high level?
+134. What should a beginner know about intrusion detection?
+135. What are defensive, responsible, or practical best practices for intrusion detection?
+136. Can you explain intrusion prevention?
+137. Why should someone learn about intrusion prevention?
+138. How does intrusion prevention work at a high level?
+139. What should a beginner know about intrusion prevention?
+140. What are defensive, responsible, or practical best practices for intrusion prevention?
+141. Can you explain network monitoring?
+142. Why should someone learn about network monitoring?
+143. How does network monitoring work at a high level?
+144. What should a beginner know about network monitoring?
+145. What are defensive, responsible, or practical best practices for network monitoring?
+146. Can you explain secure remote access?
+147. Why should someone learn about secure remote access?
+148. How does secure remote access work at a high level?
+149. What should a beginner know about secure remote access?
+150. What are defensive, responsible, or practical best practices for secure remote access?
+
+Endpoint And Malware Defense
+
+151. Can you explain endpoint protection?
+152. Why should someone learn about endpoint protection?
+153. How does endpoint protection work at a high level?
+154. What should a beginner know about endpoint protection?
+155. What are defensive, responsible, or practical best practices for endpoint protection?
+156. Can you explain malware?
+157. Why should someone learn about malware?
+158. How does malware work at a high level?
+159. What should a beginner know about malware?
+160. What are defensive, responsible, or practical best practices for malware?
+161. Can you explain ransomware defense?
+162. Why should someone learn about ransomware defense?
+163. How does ransomware defense work at a high level?
+164. What should a beginner know about ransomware defense?
+165. What are defensive, responsible, or practical best practices for ransomware defense?
+166. Can you explain phishing defense?
+167. Why should someone learn about phishing defense?
+168. How does phishing defense work at a high level?
+169. What should a beginner know about phishing defense?
+170. What are defensive, responsible, or practical best practices for phishing defense?
+171. Can you explain patch management?
+172. Why should someone learn about patch management?
+173. How does patch management work at a high level?
+174. What should a beginner know about patch management?
+175. What are defensive, responsible, or practical best practices for patch management?
+176. Can you explain device hardening?
+177. Why should someone learn about device hardening?
+178. How does device hardening work at a high level?
+179. What should a beginner know about device hardening?
+180. What are defensive, responsible, or practical best practices for device hardening?
+181. Can you explain application allowlisting?
+182. Why should someone learn about application allowlisting?
+183. How does application allowlisting work at a high level?
+184. What should a beginner know about application allowlisting?
+185. What are defensive, responsible, or practical best practices for application allowlisting?
+186. Can you explain data backup strategy?
+187. Why should someone learn about data backup strategy?
+188. How does data backup strategy work at a high level?
+189. What should a beginner know about data backup strategy?
+190. What are defensive, responsible, or practical best practices for data backup strategy?
+191. Can you explain endpoint detection and response?
+192. Why should someone learn about endpoint detection and response?
+193. How does endpoint detection and response work at a high level?
+194. What should a beginner know about endpoint detection and response?
+195. What are defensive, responsible, or practical best practices for endpoint detection and response?
+196. Can you explain incident containment?
+197. Why should someone learn about incident containment?
+198. How does incident containment work at a high level?
+199. What should a beginner know about incident containment?
+200. What are defensive, responsible, or practical best practices for incident containment?
+
+Web And Application Security
+
+201. Can you explain secure software development?
+202. Why should someone learn about secure software development?
+203. How does secure software development work at a high level?
+204. What should a beginner know about secure software development?
+205. What are defensive, responsible, or practical best practices for secure software development?
+206. Can you explain OWASP Top 10 risks?
+207. Why should someone learn about OWASP Top 10 risks?
+208. How does OWASP Top 10 risks work at a high level?
+209. What should a beginner know about OWASP Top 10 risks?
+210. What are defensive, responsible, or practical best practices for OWASP Top 10 risks?
+211. Can you explain SQL injection prevention?
+212. Why should someone learn about SQL injection prevention?
+213. How does SQL injection prevention work at a high level?
+214. What should a beginner know about SQL injection prevention?
+215. What are defensive, responsible, or practical best practices for SQL injection prevention?
+216. Can you explain cross site scripting prevention?
+217. Why should someone learn about cross site scripting prevention?
+218. How does cross site scripting prevention work at a high level?
+219. What should a beginner know about cross site scripting prevention?
+220. What are defensive, responsible, or practical best practices for cross site scripting prevention?
+221. Can you explain API security?
+222. Why should someone learn about API security?
+223. How does API security work at a high level?
+224. What should a beginner know about API security?
+225. What are defensive, responsible, or practical best practices for API security?
+226. Can you explain input validation?
+227. Why should someone learn about input validation?
+228. How does input validation work at a high level?
+229. What should a beginner know about input validation?
+230. What are defensive, responsible, or practical best practices for input validation?
+231. Can you explain secure session management?
+232. Why should someone learn about secure session management?
+233. How does secure session management work at a high level?
+234. What should a beginner know about secure session management?
+235. What are defensive, responsible, or practical best practices for secure session management?
+236. Can you explain dependency security?
+237. Why should someone learn about dependency security?
+238. How does dependency security work at a high level?
+239. What should a beginner know about dependency security?
+240. What are defensive, responsible, or practical best practices for dependency security?
+241. Can you explain secrets management?
+242. Why should someone learn about secrets management?
+243. How does secrets management work at a high level?
+244. What should a beginner know about secrets management?
+245. What are defensive, responsible, or practical best practices for secrets management?
+246. Can you explain secure code review?
+247. Why should someone learn about secure code review?
+248. How does secure code review work at a high level?
+249. What should a beginner know about secure code review?
+250. What are defensive, responsible, or practical best practices for secure code review?
+
+Cloud And Infrastructure Security
+
+251. Can you explain cloud shared responsibility?
+252. Why should someone learn about cloud shared responsibility?
+253. How does cloud shared responsibility work at a high level?
+254. What should a beginner know about cloud shared responsibility?
+255. What are defensive, responsible, or practical best practices for cloud shared responsibility?
+256. Can you explain cloud identity security?
+257. Why should someone learn about cloud identity security?
+258. How does cloud identity security work at a high level?
+259. What should a beginner know about cloud identity security?
+260. What are defensive, responsible, or practical best practices for cloud identity security?
+261. Can you explain infrastructure as code security?
+262. Why should someone learn about infrastructure as code security?
+263. How does infrastructure as code security work at a high level?
+264. What should a beginner know about infrastructure as code security?
+265. What are defensive, responsible, or practical best practices for infrastructure as code security?
+266. Can you explain container security?
+267. Why should someone learn about container security?
+268. How does container security work at a high level?
+269. What should a beginner know about container security?
+270. What are defensive, responsible, or practical best practices for container security?
+271. Can you explain Kubernetes security?
+272. Why should someone learn about Kubernetes security?
+273. How does Kubernetes security work at a high level?
+274. What should a beginner know about Kubernetes security?
+275. What are defensive, responsible, or practical best practices for Kubernetes security?
+276. Can you explain server hardening?
+277. Why should someone learn about server hardening?
+278. How does server hardening work at a high level?
+279. What should a beginner know about server hardening?
+280. What are defensive, responsible, or practical best practices for server hardening?
+281. Can you explain logging and monitoring?
+282. Why should someone learn about logging and monitoring?
+283. How does logging and monitoring work at a high level?
+284. What should a beginner know about logging and monitoring?
+285. What are defensive, responsible, or practical best practices for logging and monitoring?
+286. Can you explain cloud misconfiguration prevention?
+287. Why should someone learn about cloud misconfiguration prevention?
+288. How does cloud misconfiguration prevention work at a high level?
+289. What should a beginner know about cloud misconfiguration prevention?
+290. What are defensive, responsible, or practical best practices for cloud misconfiguration prevention?
+291. Can you explain backup and disaster recovery?
+292. Why should someone learn about backup and disaster recovery?
+293. How does backup and disaster recovery work at a high level?
+294. What should a beginner know about backup and disaster recovery?
+295. What are defensive, responsible, or practical best practices for backup and disaster recovery?
+296. Can you explain secure configuration baselines?
+297. Why should someone learn about secure configuration baselines?
+298. How does secure configuration baselines work at a high level?
+299. What should a beginner know about secure configuration baselines?
+300. What are defensive, responsible, or practical best practices for secure configuration baselines?
+
+Security Operations
+
+301. Can you explain security operations centers?
+302. Why should someone learn about security operations centers?
+303. How does security operations centers work at a high level?
+304. What should a beginner know about security operations centers?
+305. What are defensive, responsible, or practical best practices for security operations centers?
+306. Can you explain alert triage?
+307. Why should someone learn about alert triage?
+308. How does alert triage work at a high level?
+309. What should a beginner know about alert triage?
+310. What are defensive, responsible, or practical best practices for alert triage?
+311. Can you explain log analysis?
+312. Why should someone learn about log analysis?
+313. How does log analysis work at a high level?
+314. What should a beginner know about log analysis?
+315. What are defensive, responsible, or practical best practices for log analysis?
+316. Can you explain SIEM systems?
+317. Why should someone learn about SIEM systems?
+318. How does SIEM systems work at a high level?
+319. What should a beginner know about SIEM systems?
+320. What are defensive, responsible, or practical best practices for SIEM systems?
+321. Can you explain threat hunting?
+322. Why should someone learn about threat hunting?
+323. How does threat hunting work at a high level?
+324. What should a beginner know about threat hunting?
+325. What are defensive, responsible, or practical best practices for threat hunting?
+326. Can you explain incident response?
+327. Why should someone learn about incident response?
+328. How does incident response work at a high level?
+329. What should a beginner know about incident response?
+330. What are defensive, responsible, or practical best practices for incident response?
+331. Can you explain digital forensics basics?
+332. Why should someone learn about digital forensics basics?
+333. How does digital forensics basics work at a high level?
+334. What should a beginner know about digital forensics basics?
+335. What are defensive, responsible, or practical best practices for digital forensics basics?
+336. Can you explain security playbooks?
+337. Why should someone learn about security playbooks?
+338. How does security playbooks work at a high level?
+339. What should a beginner know about security playbooks?
+340. What are defensive, responsible, or practical best practices for security playbooks?
+341. Can you explain root cause analysis?
+342. Why should someone learn about root cause analysis?
+343. How does root cause analysis work at a high level?
+344. What should a beginner know about root cause analysis?
+345. What are defensive, responsible, or practical best practices for root cause analysis?
+346. Can you explain post incident reviews?
+347. Why should someone learn about post incident reviews?
+348. How does post incident reviews work at a high level?
+349. What should a beginner know about post incident reviews?
+350. What are defensive, responsible, or practical best practices for post incident reviews?
+
+Governance Risk And Compliance
+
+351. Can you explain security policies?
+352. Why should someone learn about security policies?
+353. How does security policies work at a high level?
+354. What should a beginner know about security policies?
+355. What are defensive, responsible, or practical best practices for security policies?
+356. Can you explain risk assessments?
+357. Why should someone learn about risk assessments?
+358. How does risk assessments work at a high level?
+359. What should a beginner know about risk assessments?
+360. What are defensive, responsible, or practical best practices for risk assessments?
+361. Can you explain vendor risk management?
+362. Why should someone learn about vendor risk management?
+363. How does vendor risk management work at a high level?
+364. What should a beginner know about vendor risk management?
+365. What are defensive, responsible, or practical best practices for vendor risk management?
+366. Can you explain data privacy?
+367. Why should someone learn about data privacy?
+368. How does data privacy work at a high level?
+369. What should a beginner know about data privacy?
+370. What are defensive, responsible, or practical best practices for data privacy?
+371. Can you explain security audits?
+372. Why should someone learn about security audits?
+373. How does security audits work at a high level?
+374. What should a beginner know about security audits?
+375. What are defensive, responsible, or practical best practices for security audits?
+376. Can you explain compliance frameworks?
+377. Why should someone learn about compliance frameworks?
+378. How does compliance frameworks work at a high level?
+379. What should a beginner know about compliance frameworks?
+380. What are defensive, responsible, or practical best practices for compliance frameworks?
+381. Can you explain asset inventory?
+382. Why should someone learn about asset inventory?
+383. How does asset inventory work at a high level?
+384. What should a beginner know about asset inventory?
+385. What are defensive, responsible, or practical best practices for asset inventory?
+386. Can you explain business continuity planning?
+387. Why should someone learn about business continuity planning?
+388. How does business continuity planning work at a high level?
+389. What should a beginner know about business continuity planning?
+390. What are defensive, responsible, or practical best practices for business continuity planning?
+391. Can you explain security metrics?
+392. Why should someone learn about security metrics?
+393. How does security metrics work at a high level?
+394. What should a beginner know about security metrics?
+395. What are defensive, responsible, or practical best practices for security metrics?
+396. Can you explain executive cyber reporting?
+397. Why should someone learn about executive cyber reporting?
+398. How does executive cyber reporting work at a high level?
+399. What should a beginner know about executive cyber reporting?
+400. What are defensive, responsible, or practical best practices for executive cyber reporting?
+
+Human Security And Social Engineering
+
+401. Can you explain social engineering?
+402. Why should someone learn about social engineering?
+403. How does social engineering work at a high level?
+404. What should a beginner know about social engineering?
+405. What are defensive, responsible, or practical best practices for social engineering?
+406. Can you explain phishing emails?
+407. Why should someone learn about phishing emails?
+408. How does phishing emails work at a high level?
+409. What should a beginner know about phishing emails?
+410. What are defensive, responsible, or practical best practices for phishing emails?
+411. Can you explain business email compromise?
+412. Why should someone learn about business email compromise?
+413. How does business email compromise work at a high level?
+414. What should a beginner know about business email compromise?
+415. What are defensive, responsible, or practical best practices for business email compromise?
+416. Can you explain safe password habits?
+417. Why should someone learn about safe password habits?
+418. How does safe password habits work at a high level?
+419. What should a beginner know about safe password habits?
+420. What are defensive, responsible, or practical best practices for safe password habits?
+421. Can you explain secure browsing?
+422. Why should someone learn about secure browsing?
+423. How does secure browsing work at a high level?
+424. What should a beginner know about secure browsing?
+425. What are defensive, responsible, or practical best practices for secure browsing?
+426. Can you explain mobile device safety?
+427. Why should someone learn about mobile device safety?
+428. How does mobile device safety work at a high level?
+429. What should a beginner know about mobile device safety?
+430. What are defensive, responsible, or practical best practices for mobile device safety?
+431. Can you explain public Wi Fi risks?
+432. Why should someone learn about public Wi Fi risks?
+433. How does public Wi Fi risks work at a high level?
+434. What should a beginner know about public Wi Fi risks?
+435. What are defensive, responsible, or practical best practices for public Wi Fi risks?
+436. Can you explain security culture?
+437. Why should someone learn about security culture?
+438. How does security culture work at a high level?
+439. What should a beginner know about security culture?
+440. What are defensive, responsible, or practical best practices for security culture?
+441. Can you explain reporting suspicious activity?
+442. Why should someone learn about reporting suspicious activity?
+443. How does reporting suspicious activity work at a high level?
+444. What should a beginner know about reporting suspicious activity?
+445. What are defensive, responsible, or practical best practices for reporting suspicious activity?
+446. Can you explain cyber hygiene?
+447. Why should someone learn about cyber hygiene?
+448. How does cyber hygiene work at a high level?
+449. What should a beginner know about cyber hygiene?
+450. What are defensive, responsible, or practical best practices for cyber hygiene?
+
+Defensive Security Learning
+
+451. Can you explain cybersecurity career paths?
+452. Why should someone learn about cybersecurity career paths?
+453. How does cybersecurity career paths work at a high level?
+454. What should a beginner know about cybersecurity career paths?
+455. What are defensive, responsible, or practical best practices for cybersecurity career paths?
+456. Can you explain home lab safety?
+457. Why should someone learn about home lab safety?
+458. How does home lab safety work at a high level?
+459. What should a beginner know about home lab safety?
+460. What are defensive, responsible, or practical best practices for home lab safety?
+461. Can you explain ethical hacking boundaries?
+462. Why should someone learn about ethical hacking boundaries?
+463. How does ethical hacking boundaries work at a high level?
+464. What should a beginner know about ethical hacking boundaries?
+465. What are defensive, responsible, or practical best practices for ethical hacking boundaries?
+466. Can you explain capture the flag practice?
+467. Why should someone learn about capture the flag practice?
+468. How does capture the flag practice work at a high level?
+469. What should a beginner know about capture the flag practice?
+470. What are defensive, responsible, or practical best practices for capture the flag practice?
+471. Can you explain security certifications?
+472. Why should someone learn about security certifications?
+473. How does security certifications work at a high level?
+474. What should a beginner know about security certifications?
+475. What are defensive, responsible, or practical best practices for security certifications?
+476. Can you explain threat intelligence basics?
+477. Why should someone learn about threat intelligence basics?
+478. How does threat intelligence basics work at a high level?
+479. What should a beginner know about threat intelligence basics?
+480. What are defensive, responsible, or practical best practices for threat intelligence basics?
+481. Can you explain secure Linux administration?
+482. Why should someone learn about secure Linux administration?
+483. How does secure Linux administration work at a high level?
+484. What should a beginner know about secure Linux administration?
+485. What are defensive, responsible, or practical best practices for secure Linux administration?
+486. Can you explain secure Windows administration?
+487. Why should someone learn about secure Windows administration?
+488. How does secure Windows administration work at a high level?
+489. What should a beginner know about secure Windows administration?
+490. What are defensive, responsible, or practical best practices for secure Windows administration?
+491. Can you explain defensive scripting?
+492. Why should someone learn about defensive scripting?
+493. How does defensive scripting work at a high level?
+494. What should a beginner know about defensive scripting?
+495. What are defensive, responsible, or practical best practices for defensive scripting?
+496. Can you explain responsible disclosure?
+497. Why should someone learn about responsible disclosure?
+498. How does responsible disclosure work at a high level?
+499. What should a beginner know about responsible disclosure?
+500. What are defensive, responsible, or practical best practices for responsible disclosure?
+
+AI Foundations
+
+501. Can you explain artificial intelligence?
+502. Why should someone learn about artificial intelligence?
+503. How does artificial intelligence work at a high level?
+504. What should a beginner know about artificial intelligence?
+505. What are defensive, responsible, or practical best practices for artificial intelligence?
+506. Can you explain machine learning?
+507. Why should someone learn about machine learning?
+508. How does machine learning work at a high level?
+509. What should a beginner know about machine learning?
+510. What are defensive, responsible, or practical best practices for machine learning?
+511. Can you explain deep learning?
+512. Why should someone learn about deep learning?
+513. How does deep learning work at a high level?
+514. What should a beginner know about deep learning?
+515. What are defensive, responsible, or practical best practices for deep learning?
+516. Can you explain neural networks?
+517. Why should someone learn about neural networks?
+518. How does neural networks work at a high level?
+519. What should a beginner know about neural networks?
+520. What are defensive, responsible, or practical best practices for neural networks?
+521. Can you explain training data?
+522. Why should someone learn about training data?
+523. How does training data work at a high level?
+524. What should a beginner know about training data?
+525. What are defensive, responsible, or practical best practices for training data?
+526. Can you explain model inference?
+527. Why should someone learn about model inference?
+528. How does model inference work at a high level?
+529. What should a beginner know about model inference?
+530. What are defensive, responsible, or practical best practices for model inference?
+531. Can you explain classification models?
+532. Why should someone learn about classification models?
+533. How does classification models work at a high level?
+534. What should a beginner know about classification models?
+535. What are defensive, responsible, or practical best practices for classification models?
+536. Can you explain regression models?
+537. Why should someone learn about regression models?
+538. How does regression models work at a high level?
+539. What should a beginner know about regression models?
+540. What are defensive, responsible, or practical best practices for regression models?
+541. Can you explain model evaluation?
+542. Why should someone learn about model evaluation?
+543. How does model evaluation work at a high level?
+544. What should a beginner know about model evaluation?
+545. What are defensive, responsible, or practical best practices for model evaluation?
+546. Can you explain AI limitations?
+547. Why should someone learn about AI limitations?
+548. How does AI limitations work at a high level?
+549. What should a beginner know about AI limitations?
+550. What are defensive, responsible, or practical best practices for AI limitations?
+
+Large Language Models
+
+551. Can you explain large language models?
+552. Why should someone learn about large language models?
+553. How does large language models work at a high level?
+554. What should a beginner know about large language models?
+555. What are defensive, responsible, or practical best practices for large language models?
+556. Can you explain tokens and context windows?
+557. Why should someone learn about tokens and context windows?
+558. How does tokens and context windows work at a high level?
+559. What should a beginner know about tokens and context windows?
+560. What are defensive, responsible, or practical best practices for tokens and context windows?
+561. Can you explain prompt engineering?
+562. Why should someone learn about prompt engineering?
+563. How does prompt engineering work at a high level?
+564. What should a beginner know about prompt engineering?
+565. What are defensive, responsible, or practical best practices for prompt engineering?
+566. Can you explain system prompts?
+567. Why should someone learn about system prompts?
+568. How does system prompts work at a high level?
+569. What should a beginner know about system prompts?
+570. What are defensive, responsible, or practical best practices for system prompts?
+571. Can you explain retrieval augmented generation?
+572. Why should someone learn about retrieval augmented generation?
+573. How does retrieval augmented generation work at a high level?
+574. What should a beginner know about retrieval augmented generation?
+575. What are defensive, responsible, or practical best practices for retrieval augmented generation?
+576. Can you explain embeddings?
+577. Why should someone learn about embeddings?
+578. How does embeddings work at a high level?
+579. What should a beginner know about embeddings?
+580. What are defensive, responsible, or practical best practices for embeddings?
+581. Can you explain fine tuning?
+582. Why should someone learn about fine tuning?
+583. How does fine tuning work at a high level?
+584. What should a beginner know about fine tuning?
+585. What are defensive, responsible, or practical best practices for fine tuning?
+586. Can you explain instruction following?
+587. Why should someone learn about instruction following?
+588. How does instruction following work at a high level?
+589. What should a beginner know about instruction following?
+590. What are defensive, responsible, or practical best practices for instruction following?
+591. Can you explain hallucination reduction?
+592. Why should someone learn about hallucination reduction?
+593. How does hallucination reduction work at a high level?
+594. What should a beginner know about hallucination reduction?
+595. What are defensive, responsible, or practical best practices for hallucination reduction?
+596. Can you explain model selection?
+597. Why should someone learn about model selection?
+598. How does model selection work at a high level?
+599. What should a beginner know about model selection?
+600. What are defensive, responsible, or practical best practices for model selection?
+
+AI Safety And Reliability
+
+601. Can you explain AI safety?
+602. Why should someone learn about AI safety?
+603. How does AI safety work at a high level?
+604. What should a beginner know about AI safety?
+605. What are defensive, responsible, or practical best practices for AI safety?
+606. Can you explain AI bias?
+607. Why should someone learn about AI bias?
+608. How does AI bias work at a high level?
+609. What should a beginner know about AI bias?
+610. What are defensive, responsible, or practical best practices for AI bias?
+611. Can you explain AI transparency?
+612. Why should someone learn about AI transparency?
+613. How does AI transparency work at a high level?
+614. What should a beginner know about AI transparency?
+615. What are defensive, responsible, or practical best practices for AI transparency?
+616. Can you explain AI explainability?
+617. Why should someone learn about AI explainability?
+618. How does AI explainability work at a high level?
+619. What should a beginner know about AI explainability?
+620. What are defensive, responsible, or practical best practices for AI explainability?
+621. Can you explain AI evaluation?
+622. Why should someone learn about AI evaluation?
+623. How does AI evaluation work at a high level?
+624. What should a beginner know about AI evaluation?
+625. What are defensive, responsible, or practical best practices for AI evaluation?
+626. Can you explain human oversight?
+627. Why should someone learn about human oversight?
+628. How does human oversight work at a high level?
+629. What should a beginner know about human oversight?
+630. What are defensive, responsible, or practical best practices for human oversight?
+631. Can you explain model drift?
+632. Why should someone learn about model drift?
+633. How does model drift work at a high level?
+634. What should a beginner know about model drift?
+635. What are defensive, responsible, or practical best practices for model drift?
+636. Can you explain AI risk management?
+637. Why should someone learn about AI risk management?
+638. How does AI risk management work at a high level?
+639. What should a beginner know about AI risk management?
+640. What are defensive, responsible, or practical best practices for AI risk management?
+641. Can you explain responsible AI?
+642. Why should someone learn about responsible AI?
+643. How does responsible AI work at a high level?
+644. What should a beginner know about responsible AI?
+645. What are defensive, responsible, or practical best practices for responsible AI?
+646. Can you explain AI governance?
+647. Why should someone learn about AI governance?
+648. How does AI governance work at a high level?
+649. What should a beginner know about AI governance?
+650. What are defensive, responsible, or practical best practices for AI governance?
+
+AI Security
+
+651. Can you explain prompt injection?
+652. Why should someone learn about prompt injection?
+653. How does prompt injection work at a high level?
+654. What should a beginner know about prompt injection?
+655. What are defensive, responsible, or practical best practices for prompt injection?
+656. Can you explain data poisoning?
+657. Why should someone learn about data poisoning?
+658. How does data poisoning work at a high level?
+659. What should a beginner know about data poisoning?
+660. What are defensive, responsible, or practical best practices for data poisoning?
+661. Can you explain model stealing?
+662. Why should someone learn about model stealing?
+663. How does model stealing work at a high level?
+664. What should a beginner know about model stealing?
+665. What are defensive, responsible, or practical best practices for model stealing?
+666. Can you explain model inversion?
+667. Why should someone learn about model inversion?
+668. How does model inversion work at a high level?
+669. What should a beginner know about model inversion?
+670. What are defensive, responsible, or practical best practices for model inversion?
+671. Can you explain adversarial examples?
+672. Why should someone learn about adversarial examples?
+673. How does adversarial examples work at a high level?
+674. What should a beginner know about adversarial examples?
+675. What are defensive, responsible, or practical best practices for adversarial examples?
+676. Can you explain AI red teaming?
+677. Why should someone learn about AI red teaming?
+678. How does AI red teaming work at a high level?
+679. What should a beginner know about AI red teaming?
+680. What are defensive, responsible, or practical best practices for AI red teaming?
+681. Can you explain secure AI deployment?
+682. Why should someone learn about secure AI deployment?
+683. How does secure AI deployment work at a high level?
+684. What should a beginner know about secure AI deployment?
+685. What are defensive, responsible, or practical best practices for secure AI deployment?
+686. Can you explain AI supply chain security?
+687. Why should someone learn about AI supply chain security?
+688. How does AI supply chain security work at a high level?
+689. What should a beginner know about AI supply chain security?
+690. What are defensive, responsible, or practical best practices for AI supply chain security?
+691. Can you explain LLM application security?
+692. Why should someone learn about LLM application security?
+693. How does LLM application security work at a high level?
+694. What should a beginner know about LLM application security?
+695. What are defensive, responsible, or practical best practices for LLM application security?
+696. Can you explain AI incident response?
+697. Why should someone learn about AI incident response?
+698. How does AI incident response work at a high level?
+699. What should a beginner know about AI incident response?
+700. What are defensive, responsible, or practical best practices for AI incident response?
+
+Local AI And Ollama
+
+701. Can you explain local AI models?
+702. Why should someone learn about local AI models?
+703. How does local AI models work at a high level?
+704. What should a beginner know about local AI models?
+705. What are defensive, responsible, or practical best practices for local AI models?
+706. Can you explain Ollama?
+707. Why should someone learn about Ollama?
+708. How does Ollama work at a high level?
+709. What should a beginner know about Ollama?
+710. What are defensive, responsible, or practical best practices for Ollama?
+711. Can you explain small language models?
+712. Why should someone learn about small language models?
+713. How does small language models work at a high level?
+714. What should a beginner know about small language models?
+715. What are defensive, responsible, or practical best practices for small language models?
+716. Can you explain model quantization?
+717. Why should someone learn about model quantization?
+718. How does model quantization work at a high level?
+719. What should a beginner know about model quantization?
+720. What are defensive, responsible, or practical best practices for model quantization?
+721. Can you explain CPU inference?
+722. Why should someone learn about CPU inference?
+723. How does CPU inference work at a high level?
+724. What should a beginner know about CPU inference?
+725. What are defensive, responsible, or practical best practices for CPU inference?
+726. Can you explain GPU acceleration?
+727. Why should someone learn about GPU acceleration?
+728. How does GPU acceleration work at a high level?
+729. What should a beginner know about GPU acceleration?
+730. What are defensive, responsible, or practical best practices for GPU acceleration?
+731. Can you explain privacy with local AI?
+732. Why should someone learn about privacy with local AI?
+733. How does privacy with local AI work at a high level?
+734. What should a beginner know about privacy with local AI?
+735. What are defensive, responsible, or practical best practices for privacy with local AI?
+736. Can you explain offline assistants?
+737. Why should someone learn about offline assistants?
+738. How does offline assistants work at a high level?
+739. What should a beginner know about offline assistants?
+740. What are defensive, responsible, or practical best practices for offline assistants?
+741. Can you explain latency tuning?
+742. Why should someone learn about latency tuning?
+743. How does latency tuning work at a high level?
+744. What should a beginner know about latency tuning?
+745. What are defensive, responsible, or practical best practices for latency tuning?
+746. Can you explain voice assistant model choice?
+747. Why should someone learn about voice assistant model choice?
+748. How does voice assistant model choice work at a high level?
+749. What should a beginner know about voice assistant model choice?
+750. What are defensive, responsible, or practical best practices for voice assistant model choice?
+
+AI For Cybersecurity
+
+751. Can you explain AI assisted log analysis?
+752. Why should someone learn about AI assisted log analysis?
+753. How does AI assisted log analysis work at a high level?
+754. What should a beginner know about AI assisted log analysis?
+755. What are defensive, responsible, or practical best practices for AI assisted log analysis?
+756. Can you explain AI for phishing detection?
+757. Why should someone learn about AI for phishing detection?
+758. How does AI for phishing detection work at a high level?
+759. What should a beginner know about AI for phishing detection?
+760. What are defensive, responsible, or practical best practices for AI for phishing detection?
+761. Can you explain AI for malware classification?
+762. Why should someone learn about AI for malware classification?
+763. How does AI for malware classification work at a high level?
+764. What should a beginner know about AI for malware classification?
+765. What are defensive, responsible, or practical best practices for AI for malware classification?
+766. Can you explain AI for vulnerability prioritization?
+767. Why should someone learn about AI for vulnerability prioritization?
+768. How does AI for vulnerability prioritization work at a high level?
+769. What should a beginner know about AI for vulnerability prioritization?
+770. What are defensive, responsible, or practical best practices for AI for vulnerability prioritization?
+771. Can you explain AI for security automation?
+772. Why should someone learn about AI for security automation?
+773. How does AI for security automation work at a high level?
+774. What should a beginner know about AI for security automation?
+775. What are defensive, responsible, or practical best practices for AI for security automation?
+776. Can you explain AI for threat intelligence?
+777. Why should someone learn about AI for threat intelligence?
+778. How does AI for threat intelligence work at a high level?
+779. What should a beginner know about AI for threat intelligence?
+780. What are defensive, responsible, or practical best practices for AI for threat intelligence?
+781. Can you explain AI for incident response?
+782. Why should someone learn about AI for incident response?
+783. How does AI for incident response work at a high level?
+784. What should a beginner know about AI for incident response?
+785. What are defensive, responsible, or practical best practices for AI for incident response?
+786. Can you explain AI for user behavior analytics?
+787. Why should someone learn about AI for user behavior analytics?
+788. How does AI for user behavior analytics work at a high level?
+789. What should a beginner know about AI for user behavior analytics?
+790. What are defensive, responsible, or practical best practices for AI for user behavior analytics?
+791. Can you explain AI for cloud security monitoring?
+792. Why should someone learn about AI for cloud security monitoring?
+793. How does AI for cloud security monitoring work at a high level?
+794. What should a beginner know about AI for cloud security monitoring?
+795. What are defensive, responsible, or practical best practices for AI for cloud security monitoring?
+796. Can you explain AI for secure code review?
+797. Why should someone learn about AI for secure code review?
+798. How does AI for secure code review work at a high level?
+799. What should a beginner know about AI for secure code review?
+800. What are defensive, responsible, or practical best practices for AI for secure code review?
+
+Data And Privacy For AI
+
+801. Can you explain data minimization?
+802. Why should someone learn about data minimization?
+803. How does data minimization work at a high level?
+804. What should a beginner know about data minimization?
+805. What are defensive, responsible, or practical best practices for data minimization?
+806. Can you explain personally identifiable information?
+807. Why should someone learn about personally identifiable information?
+808. How does personally identifiable information work at a high level?
+809. What should a beginner know about personally identifiable information?
+810. What are defensive, responsible, or practical best practices for personally identifiable information?
+811. Can you explain privacy preserving AI?
+812. Why should someone learn about privacy preserving AI?
+813. How does privacy preserving AI work at a high level?
+814. What should a beginner know about privacy preserving AI?
+815. What are defensive, responsible, or practical best practices for privacy preserving AI?
+816. Can you explain synthetic data?
+817. Why should someone learn about synthetic data?
+818. How does synthetic data work at a high level?
+819. What should a beginner know about synthetic data?
+820. What are defensive, responsible, or practical best practices for synthetic data?
+821. Can you explain data labeling quality?
+822. Why should someone learn about data labeling quality?
+823. How does data labeling quality work at a high level?
+824. What should a beginner know about data labeling quality?
+825. What are defensive, responsible, or practical best practices for data labeling quality?
+826. Can you explain dataset bias?
+827. Why should someone learn about dataset bias?
+828. How does dataset bias work at a high level?
+829. What should a beginner know about dataset bias?
+830. What are defensive, responsible, or practical best practices for dataset bias?
+831. Can you explain data retention?
+832. Why should someone learn about data retention?
+833. How does data retention work at a high level?
+834. What should a beginner know about data retention?
+835. What are defensive, responsible, or practical best practices for data retention?
+836. Can you explain secure data pipelines?
+837. Why should someone learn about secure data pipelines?
+838. How does secure data pipelines work at a high level?
+839. What should a beginner know about secure data pipelines?
+840. What are defensive, responsible, or practical best practices for secure data pipelines?
+841. Can you explain access control for AI data?
+842. Why should someone learn about access control for AI data?
+843. How does access control for AI data work at a high level?
+844. What should a beginner know about access control for AI data?
+845. What are defensive, responsible, or practical best practices for access control for AI data?
+846. Can you explain audit logs for AI systems?
+847. Why should someone learn about audit logs for AI systems?
+848. How does audit logs for AI systems work at a high level?
+849. What should a beginner know about audit logs for AI systems?
+850. What are defensive, responsible, or practical best practices for audit logs for AI systems?
+
+Building AI Applications
+
+851. Can you explain AI application architecture?
+852. Why should someone learn about AI application architecture?
+853. How does AI application architecture work at a high level?
+854. What should a beginner know about AI application architecture?
+855. What are defensive, responsible, or practical best practices for AI application architecture?
+856. Can you explain chatbot design?
+857. Why should someone learn about chatbot design?
+858. How does chatbot design work at a high level?
+859. What should a beginner know about chatbot design?
+860. What are defensive, responsible, or practical best practices for chatbot design?
+861. Can you explain voice assistant design?
+862. Why should someone learn about voice assistant design?
+863. How does voice assistant design work at a high level?
+864. What should a beginner know about voice assistant design?
+865. What are defensive, responsible, or practical best practices for voice assistant design?
+866. Can you explain tool calling?
+867. Why should someone learn about tool calling?
+868. How does tool calling work at a high level?
+869. What should a beginner know about tool calling?
+870. What are defensive, responsible, or practical best practices for tool calling?
+871. Can you explain agent workflows?
+872. Why should someone learn about agent workflows?
+873. How does agent workflows work at a high level?
+874. What should a beginner know about agent workflows?
+875. What are defensive, responsible, or practical best practices for agent workflows?
+876. Can you explain conversation memory?
+877. Why should someone learn about conversation memory?
+878. How does conversation memory work at a high level?
+879. What should a beginner know about conversation memory?
+880. What are defensive, responsible, or practical best practices for conversation memory?
+881. Can you explain response grounding?
+882. Why should someone learn about response grounding?
+883. How does response grounding work at a high level?
+884. What should a beginner know about response grounding?
+885. What are defensive, responsible, or practical best practices for response grounding?
+886. Can you explain fallback handling?
+887. Why should someone learn about fallback handling?
+888. How does fallback handling work at a high level?
+889. What should a beginner know about fallback handling?
+890. What are defensive, responsible, or practical best practices for fallback handling?
+891. Can you explain testing AI applications?
+892. Why should someone learn about testing AI applications?
+893. How does testing AI applications work at a high level?
+894. What should a beginner know about testing AI applications?
+895. What are defensive, responsible, or practical best practices for testing AI applications?
+896. Can you explain monitoring AI applications?
+897. Why should someone learn about monitoring AI applications?
+898. How does monitoring AI applications work at a high level?
+899. What should a beginner know about monitoring AI applications?
+900. What are defensive, responsible, or practical best practices for monitoring AI applications?
+
+AI Ethics And Policy
+
+901. Can you explain AI ethics?
+902. Why should someone learn about AI ethics?
+903. How does AI ethics work at a high level?
+904. What should a beginner know about AI ethics?
+905. What are defensive, responsible, or practical best practices for AI ethics?
+906. Can you explain copyright and AI?
+907. Why should someone learn about copyright and AI?
+908. How does copyright and AI work at a high level?
+909. What should a beginner know about copyright and AI?
+910. What are defensive, responsible, or practical best practices for copyright and AI?
+911. Can you explain AI generated content disclosure?
+912. Why should someone learn about AI generated content disclosure?
+913. How does AI generated content disclosure work at a high level?
+914. What should a beginner know about AI generated content disclosure?
+915. What are defensive, responsible, or practical best practices for AI generated content disclosure?
+916. Can you explain workplace AI policy?
+917. Why should someone learn about workplace AI policy?
+918. How does workplace AI policy work at a high level?
+919. What should a beginner know about workplace AI policy?
+920. What are defensive, responsible, or practical best practices for workplace AI policy?
+921. Can you explain AI accountability?
+922. Why should someone learn about AI accountability?
+923. How does AI accountability work at a high level?
+924. What should a beginner know about AI accountability?
+925. What are defensive, responsible, or practical best practices for AI accountability?
+926. Can you explain AI fairness?
+927. Why should someone learn about AI fairness?
+928. How does AI fairness work at a high level?
+929. What should a beginner know about AI fairness?
+930. What are defensive, responsible, or practical best practices for AI fairness?
+931. Can you explain AI accessibility?
+932. Why should someone learn about AI accessibility?
+933. How does AI accessibility work at a high level?
+934. What should a beginner know about AI accessibility?
+935. What are defensive, responsible, or practical best practices for AI accessibility?
+936. Can you explain AI misuse prevention?
+937. Why should someone learn about AI misuse prevention?
+938. How does AI misuse prevention work at a high level?
+939. What should a beginner know about AI misuse prevention?
+940. What are defensive, responsible, or practical best practices for AI misuse prevention?
+941. Can you explain AI regulation basics?
+942. Why should someone learn about AI regulation basics?
+943. How does AI regulation basics work at a high level?
+944. What should a beginner know about AI regulation basics?
+945. What are defensive, responsible, or practical best practices for AI regulation basics?
+946. Can you explain public trust in AI?
+947. Why should someone learn about public trust in AI?
+948. How does public trust in AI work at a high level?
+949. What should a beginner know about public trust in AI?
+950. What are defensive, responsible, or practical best practices for public trust in AI?
+
+Practical Cybersecurity And AI Questions
+
+951. Can you explain choosing a safe password manager?
+952. Why should someone learn about choosing a safe password manager?
+953. How does choosing a safe password manager work at a high level?
+954. What should a beginner know about choosing a safe password manager?
+955. What are defensive, responsible, or practical best practices for choosing a safe password manager?
+956. Can you explain securing a home network?
+957. Why should someone learn about securing a home network?
+958. How does securing a home network work at a high level?
+959. What should a beginner know about securing a home network?
+960. What are defensive, responsible, or practical best practices for securing a home network?
+961. Can you explain protecting a small business?
+962. Why should someone learn about protecting a small business?
+963. How does protecting a small business work at a high level?
+964. What should a beginner know about protecting a small business?
+965. What are defensive, responsible, or practical best practices for protecting a small business?
+966. Can you explain checking whether an email is suspicious?
+967. Why should someone learn about checking whether an email is suspicious?
+968. How does checking whether an email is suspicious work at a high level?
+969. What should a beginner know about checking whether an email is suspicious?
+970. What are defensive, responsible, or practical best practices for checking whether an email is suspicious?
+971. Can you explain responding to a ransomware warning?
+972. Why should someone learn about responding to a ransomware warning?
+973. How does responding to a ransomware warning work at a high level?
+974. What should a beginner know about responding to a ransomware warning?
+975. What are defensive, responsible, or practical best practices for responding to a ransomware warning?
+976. Can you explain using AI safely at work?
+977. Why should someone learn about using AI safely at work?
+978. How does using AI safely at work work at a high level?
+979. What should a beginner know about using AI safely at work?
+980. What are defensive, responsible, or practical best practices for using AI safely at work?
+981. Can you explain protecting sensitive prompts?
+982. Why should someone learn about protecting sensitive prompts?
+983. How does protecting sensitive prompts work at a high level?
+984. What should a beginner know about protecting sensitive prompts?
+985. What are defensive, responsible, or practical best practices for protecting sensitive prompts?
+986. Can you explain evaluating an AI answer?
+987. Why should someone learn about evaluating an AI answer?
+988. How does evaluating an AI answer work at a high level?
+989. What should a beginner know about evaluating an AI answer?
+990. What are defensive, responsible, or practical best practices for evaluating an AI answer?
+991. Can you explain choosing a local AI model?
+992. Why should someone learn about choosing a local AI model?
+993. How does choosing a local AI model work at a high level?
+994. What should a beginner know about choosing a local AI model?
+995. What are defensive, responsible, or practical best practices for choosing a local AI model?
+996. Can you explain learning cybersecurity and AI together?
+997. Why should someone learn about learning cybersecurity and AI together?
+998. How does learning cybersecurity and AI together work at a high level?
+999. What should a beginner know about learning cybersecurity and AI together?
+1000. What are defensive, responsible, or practical best practices for learning cybersecurity and AI together?

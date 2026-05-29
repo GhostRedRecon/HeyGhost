@@ -74,8 +74,8 @@ class TTSConfig:
 class AudioConfig:
     sample_rate: int
     channels: int
-    input_device: Optional[int]
-    output_device: Optional[int]
+    input_device: Optional[int | str]
+    output_device: Optional[int | str]
     silence_timeout_ms: int
     min_speech_ms: int
     frame_duration_ms: int

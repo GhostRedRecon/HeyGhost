@@ -54,6 +54,8 @@ class GhostWaveRenderer:
         self.user_text = ""
         self.assistant_text = ""
         self.audio_level = 0.0
+        self.mic_volume = 0.0
+        self.speaker_volume = 0.0
         self.metrics: dict = {}
         self.phase = 0.0
         self.last_audio_time = 0.0
@@ -127,6 +129,31 @@ class GhostWaveRenderer:
                 font=(self.theme.font_family, 10),
                 anchor="nw",
             )
+        for key in ("mic_volume", "speaker_volume"):
+            self.items[f"{key}_label"] = self.canvas.create_text(
+                0,
+                0,
+                text="",
+                fill=self.theme.colors["text_secondary"],
+                font=(self.theme.font_family, 10),
+                anchor="nw",
+            )
+            self.items[f"{key}_track"] = self.canvas.create_rectangle(
+                0,
+                0,
+                1,
+                1,
+                fill=dim_color(self.theme.colors["panel"], 0.82),
+                outline=dim_color(self.theme.colors["text_secondary"], 0.32),
+            )
+            self.items[f"{key}_fill"] = self.canvas.create_rectangle(
+                0,
+                0,
+                1,
+                1,
+                fill=self.theme.colors["listening"],
+                outline="",
+            )
         inactive = dim_color(self.theme.colors["idle"], 0.6)
         for _idx in range(self.bar_count):
             self.bars.append(
@@ -192,8 +219,17 @@ class GhostWaveRenderer:
 
     def set_audio_level(self, level: float) -> None:
         self.audio_level = max(0.0, min(float(level), 1.0))
+        self.mic_volume = self.audio_level
         self.last_audio_time = time.monotonic()
         self.diagnostics.update("audio level", f"{self.audio_level:.2f}")
+
+    def set_output_volume(self, level: float | None = None, mic_level: float | None = None) -> None:
+        if level is not None:
+            self.speaker_volume = max(0.0, min(float(level), 1.0))
+            self.diagnostics.update("speaker volume", f"{self.speaker_volume:.0%}")
+        if mic_level is not None:
+            self.mic_volume = max(0.0, min(float(mic_level), 1.0))
+            self.diagnostics.update("mic volume", f"{self.mic_volume:.0%}")
 
     def set_metrics(self, metrics: dict) -> None:
         self.metrics = dict(metrics)
@@ -282,6 +318,7 @@ class GhostWaveRenderer:
         self._render_brand(center_x, max(34, int(height * 0.10)))
         if bool(getattr(self.gui_config, "show_health_indicators", False)):
             self._render_health_indicators(width)
+        self._render_volume_meters(width, height)
         spacing = wave_width / max(1, self.bar_count - 1)
         start_x = center_x - wave_width / 2
         amplitude = self._state_amplitude()
@@ -426,6 +463,28 @@ class GhostWaveRenderer:
             self.canvas.coords(item, x, y)
             self.canvas.itemconfig(item, text=label, fill=color)
             y += 20
+
+    def _render_volume_meters(self, width: int, height: int) -> None:
+        meter_width = max(120, min(180, width // 5))
+        meter_height = 8
+        x = width - meter_width - 18
+        y = 18
+        rows = (
+            ("mic_volume", "Mic", self.mic_volume, self.theme.colors["listening"]),
+            ("speaker_volume", "Speaker", self.speaker_volume, self.theme.colors["speaking"]),
+        )
+        for key, label, value, color in rows:
+            text_item = self.items[f"{key}_label"]
+            track_item = self.items[f"{key}_track"]
+            fill_item = self.items[f"{key}_fill"]
+            percent = max(0.0, min(value, 1.0))
+            self.canvas.coords(text_item, x, y)
+            self.canvas.itemconfig(text_item, text=f"{label} {percent:.0%}")
+            y += 16
+            self.canvas.coords(track_item, x, y, x + meter_width, y + meter_height)
+            self.canvas.coords(fill_item, x, y, x + meter_width * percent, y + meter_height)
+            self.canvas.itemconfig(fill_item, fill=color)
+            y += 22
 
     def shutdown(self) -> None:
         if self.tick_job is not None:

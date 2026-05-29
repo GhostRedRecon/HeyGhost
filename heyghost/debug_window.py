@@ -109,6 +109,7 @@ class GhostWaveWindow:
         if self.standalone:
             self.renderer.diagnostics.update("model", self.config.llm.model)
             self.renderer.diagnostics.update("last error", "")
+            self._refresh_audio_volumes()
             self.status_job = self.root.after(2500, self._refresh_service_status)
             return
         try:
@@ -124,7 +125,48 @@ class GhostWaveWindow:
             status = "unknown"
         self.renderer.diagnostics.update("model", self.config.llm.model)
         self.renderer.diagnostics.update("last error", "" if status == "active" else f"service {status}")
+        self._refresh_audio_volumes()
         self.status_job = self.root.after(2500, self._refresh_service_status)
+
+    def _refresh_audio_volumes(self) -> None:
+        volumes = self._read_audio_volumes()
+        self.renderer.set_output_volume(
+            level=volumes.get("speaker"),
+            mic_level=volumes.get("mic"),
+        )
+
+    def _read_audio_volumes(self) -> dict[str, float]:
+        volumes: dict[str, float] = {}
+        if shutil.which("wpctl"):
+            mapping = {
+                "speaker": "@DEFAULT_AUDIO_SINK@",
+                "mic": "@DEFAULT_AUDIO_SOURCE@",
+            }
+            for key, target in mapping.items():
+                try:
+                    result = subprocess.run(
+                        ["wpctl", "get-volume", target],
+                        check=False,
+                        capture_output=True,
+                        text=True,
+                        timeout=1,
+                    )
+                except (OSError, subprocess.SubprocessError):
+                    continue
+                if result.returncode == 0:
+                    value = self._parse_wpctl_volume(result.stdout)
+                    if value is not None:
+                        volumes[key] = value
+        return volumes
+
+    def _parse_wpctl_volume(self, text: str) -> float | None:
+        for part in text.replace(":", " ").split():
+            try:
+                value = float(part)
+            except ValueError:
+                continue
+            return max(0.0, min(value, 1.0))
+        return None
 
     def _trigger(self) -> None:
         if self.trigger_busy:

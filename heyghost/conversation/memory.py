@@ -31,7 +31,7 @@ class ConversationMemory:
     def as_prompt_text(self) -> str:
         lines = []
         for turn in self._turns:
-            role = "User" if turn["role"] == "user" else "Ghost"
+            role = "User" if turn["role"] == "user" else "Assistant"
             lines.append(f"{role}: {turn['content']}")
         return "\n".join(lines)
 
@@ -44,7 +44,7 @@ class ConversationMemory:
         lines = []
         total_chars = 0
         for turn in rows:
-            role = "User" if turn["role"] == "user" else "Ghost"
+            role = "User" if turn["role"] == "user" else "Assistant"
             line = f"{role}: {turn['content']}"
             total_chars += len(line)
             if total_chars > self.summary_max_chars:

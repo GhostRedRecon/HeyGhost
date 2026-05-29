@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68,<81", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heyghost"
+version = "0.1.0"
+description = "Local-first Linux voice assistant with local STT, Ollama, Piper TTS, and deterministic skills."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+  { name = "GhostRedRecon" }
+]
+keywords = ["voice-assistant", "linux", "ollama", "whisper", "piper", "local-first"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+  "PyYAML>=6.0",
+  "numpy>=1.24",
+  "sounddevice>=0.4.6",
+  "setuptools<81",
+  "webrtcvad>=2.0.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/GhostRedRecon/HeyGhost"
+Issues = "https://github.com/GhostRedRecon/HeyGhost/issues"
+
+[project.scripts]
+heyghost = "heyghost.app:main"
+
+[tool.setuptools]
+packages = { find = { include = ["heyghost*"] } }

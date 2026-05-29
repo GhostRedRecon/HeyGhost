@@ -1,4 +1,5 @@
 from heyghost.skills.linux_system import maybe_linux_skill
+from heyghost.skills.qa_bank import answer_qa_bank
 from heyghost.skills.qa_bank import qa_counts
 
 
@@ -46,3 +47,24 @@ def test_linux_tools_skill_answers():
     assert source == "linux:tools"
     assert action is None
     assert "tools" in spoken.lower()
+
+
+def test_qa_bank_answers_what_is_linux():
+    result = answer_qa_bank("what is linux")
+    assert result is not None
+    source, spoken = result
+    assert source == "qa_bank:linux"
+    assert "operating system" in spoken.lower()
+
+
+def test_qa_bank_answers_what_is_cybersecurity():
+    result = answer_qa_bank("what is cybersecurity")
+    assert result is not None
+    source, spoken = result
+    assert source == "qa_bank:cybersecurity"
+    assert "protect" in spoken.lower() or "security" in spoken.lower()
+
+
+def test_prompt_injection_does_not_match_sql_injection():
+    result = answer_qa_bank("what is prompt injection in an ai assistant")
+    assert result is None or "sql injection" not in result[1].lower()
