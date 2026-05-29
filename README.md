@@ -1,7 +1,5 @@
 
 
-https://github.com/user-attachments/assets/2011c855-78d7-440b-9c39-f9a59e2b2f6b
-
 # HeyGhost
 
 **HeyGhost** is a local-first Linux voice assistant built for users who want a private, hackable assistant that runs on their own hardware. It uses local speech-to-text, local Ollama models, local Piper text-to-speech, deterministic Python skills, and a systemd service so it can run as a native Linux background assistant.
